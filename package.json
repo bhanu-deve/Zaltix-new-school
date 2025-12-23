@@ -1,0 +1,13 @@
+{
+  "name": "zaltixschool",
+  "private": true,
+  "scripts": {
+    "backend": "cd backend && npm start",
+    "frontend": "cd sphere-entry-animated-home-main && npm run dev",
+    "mobile": "cd Eshcul && npx expo start",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\" \"npx expo start\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

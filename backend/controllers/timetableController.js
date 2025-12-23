@@ -1,0 +1,48 @@
+import Timetable from "../models/AddTimetable.js";
+
+// CREATE or UPDATE timetable
+export const saveOrUpdateTimetable = async (req, res) => {
+  const { className, section, academicYear, entries } = req.body;
+
+  if (!className || !section || !academicYear || !entries) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const existing = await Timetable
+      .findOne({ className, section, academicYear })
+      .exec();
+
+    if (existing) {
+      existing.entries = entries;
+      await existing.save();
+      return res.json({ message: 'Timetable updated', data: existing });
+    }
+
+    const timetable = new Timetable({ className, section, academicYear, entries });
+    await timetable.save();
+
+    res.status(201).json({ message: 'Timetable created', data: timetable });
+  } catch (err) {
+    console.error('Error saving timetable:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// GET timetable by class
+export const getTimetableByClass = async (req, res) => {
+  const { className } = req.params;
+
+  try {
+    const timetable = await Timetable.findOne({ className }).exec();
+
+    if (!timetable) {
+      return res.status(404).json({ message: 'Timetable not found' });
+    }
+
+    res.json({ data: timetable });
+  } catch (err) {
+    console.error('Error fetching timetable:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
