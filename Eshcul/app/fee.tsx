@@ -2,8 +2,8 @@ import React from 'react';
 import { View, StyleSheet, FlatList, Text, Alert } from 'react-native';
 import { Card, Title, Paragraph, Button } from 'react-native-paper';
 import * as Print from 'expo-print';
-import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import Toast from 'react-native-toast-message';
 
 interface FeeRecord {
@@ -23,24 +23,24 @@ const termWiseData: FeeRecord[] = [
 const FeeScreen = () => {
   const generateInvoiceHTML = (item: FeeRecord) => `
     <html>
-    <head>
-      <style>
-        body { font-family: Arial; padding: 20px; }
-        h1 { color: #444; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { text-align: left; padding: 10px; border: 1px solid #ccc; }
-      </style>
-    </head>
-    <body>
-      <h1>Invoice - ${item.label}</h1>
-      <table>
-        <tr><th>Term</th><td>${item.label}</td></tr>
-        <tr><th>Amount</th><td>₹${item.amount}</td></tr>
-        <tr><th>Due Date</th><td>${item.dueDate}</td></tr>
-        <tr><th>Status</th><td>${item.status}</td></tr>
-        <tr><th>Remaining</th><td>₹${item.status === 'Paid' ? 0 : item.amount}</td></tr>
-      </table>
-    </body>
+      <head>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          h1 { color: #444; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+        </style>
+      </head>
+      <body>
+        <h1>Invoice - ${item.label}</h1>
+        <table>
+          <tr><th>Term</th><td>${item.label}</td></tr>
+          <tr><th>Amount</th><td>₹${item.amount}</td></tr>
+          <tr><th>Due Date</th><td>${item.dueDate}</td></tr>
+          <tr><th>Status</th><td>${item.status}</td></tr>
+          <tr><th>Remaining</th><td>₹${item.status === 'Paid' ? 0 : item.amount}</td></tr>
+        </table>
+      </body>
     </html>
   `;
 
@@ -49,19 +49,18 @@ const FeeScreen = () => {
       const html = generateInvoiceHTML(item);
       const { uri } = await Print.printToFileAsync({ html });
 
-      const newPath = `${FileSystem.documentDirectory}Invoice_${item.label.replace(' ', '_')}.pdf`;
+      const newPath = `${FileSystem.documentDirectory}Invoice_${item.label.replace(
+        ' ',
+        '_'
+      )}.pdf`;
+
       await FileSystem.moveAsync({ from: uri, to: newPath });
 
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission required', 'Please allow media access to save the invoice');
-        return;
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(newPath);
+      } else {
+        Alert.alert('Saved', 'Invoice saved successfully');
       }
-
-      const asset = await MediaLibrary.createAssetAsync(newPath);
-      await MediaLibrary.createAlbumAsync('Download', asset, false);
-
-      Alert.alert('Success', `Invoice saved to Downloads folder`);
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Failed to generate or save invoice');
@@ -69,11 +68,10 @@ const FeeScreen = () => {
   };
 
   const handlePayment = (item: FeeRecord) => {
-    // Simulate payment success
     Toast.show({
       type: 'success',
       text1: 'Payment Successful',
-      text2: `${item.label} fee has been paid. 🎉`,
+      text2: `${item.label} fee has been paid 🎉`,
     });
   };
 
@@ -89,6 +87,7 @@ const FeeScreen = () => {
               {item.status}
             </Text>
           </View>
+
           <Paragraph style={styles.paragraph}>💰 Amount: ₹{item.amount}</Paragraph>
           <Paragraph style={styles.paragraph}>📅 Due Date: {item.dueDate}</Paragraph>
           <Paragraph style={styles.remaining}>
@@ -97,13 +96,16 @@ const FeeScreen = () => {
         </Card.Content>
 
         <Card.Actions style={styles.actions}>
-          <Button onPress={() => handleDownloadInvoice(item)}>Download Invoice</Button>
+          <Button onPress={() => handleDownloadInvoice(item)}>
+            Download Invoice
+          </Button>
           {item.status === 'Unpaid' && (
             <Button
               mode="contained"
               buttonColor="#2575fc"
               textColor="#fff"
-              onPress={() => handlePayment(item)}>
+              onPress={() => handlePayment(item)}
+            >
               Pay Now
             </Button>
           )}
