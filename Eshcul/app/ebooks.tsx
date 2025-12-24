@@ -8,7 +8,7 @@ import {
   Text,
 } from 'react-native';
 import { Card, Title, Paragraph, Button } from 'react-native-paper';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 // import axios from 'axios';
 // import {Api_url} from './config/config.js'
@@ -41,9 +41,9 @@ const EbookScreen = () => {
           id: item._id || item.id || Math.random().toString(),
           title: item.title || 'Untitled',
           subject: item.subject || '-',
-          pdfurl: item.url?.startsWith('http')
-            ? item.url
-            : `/${item.url}`,
+          pdfurl: item.pdfUrl?.startsWith('http')
+            ? item.pdfUrl
+            : `${api.defaults.baseURL}${item.pdfUrl}`,
           author: item.author || '-',
         }));
         setEbooks(formatted);
@@ -64,50 +64,34 @@ const EbookScreen = () => {
   const handleDownload = async (ebook: Ebook) => {
     try {
       if (!ebook.pdfurl) {
-        Alert.alert('Error', 'No file URL available');
+        Alert.alert('Error', 'Invalid file URL');
         return;
       }
-
-      // Sanitize title to make it a valid filename
+  
       const safeTitle = ebook.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-
-      // Extract file extension
-      let fileExt = 'pdf';
-      try {
-        const urlPath = new URL(ebook.pdfurl).pathname;
-        const parts = urlPath.split('.');
-        if (parts.length > 1) {
-          fileExt = parts.pop() || 'pdf';
-        }
-      } catch {
-        fileExt = 'pdf';
-      }
-
-      const fileName = `${safeTitle}_${Date.now()}.${fileExt}`;
-      const downloadPath = `${FileSystem.documentDirectory}${fileName}`;
-
-      console.log('Downloading from:', ebook.pdfurl);
-      console.log('Saving as:', downloadPath);
-
-      const downloadResumable = FileSystem.createDownloadResumable(
+      const fileName = `${safeTitle}_${Date.now()}.pdf`;
+      const fileUri = FileSystem.documentDirectory + fileName;
+  
+      console.log("Downloading from:", ebook.pdfurl);
+      console.log("Saving as:", fileUri);
+  
+      const { uri } = await FileSystem.downloadAsync(
         ebook.pdfurl,
-        downloadPath
+        fileUri
       );
-
-      const { uri } = await downloadResumable.downloadAsync();
-      console.log('Downloaded to:', uri);
-
-      if (!(await Sharing.isAvailableAsync())) {
-        Alert.alert('Downloaded', `Saved to: ${uri}`);
-        return;
+  
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert("Downloaded", `Saved at ${uri}`);
       }
-
-      await Sharing.shareAsync(uri);
-    } catch (error: any) {
-      console.error('Download error:', error);
-      Alert.alert('Error', 'Could not open or download file. Please check the file name or URL.');
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert("Error", `Download failed: ${e.message || e}`);
     }
   };
+  
+
 
   const renderEbookCard = ({ item }: { item: Ebook }) => (
     <Card style={[styles.card, isMidSizePhone && styles.midSizeCard]}>

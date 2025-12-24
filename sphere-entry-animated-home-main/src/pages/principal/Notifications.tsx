@@ -15,16 +15,17 @@ const Notifications = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/AddNotification`)
-      .then(res => res.json())
-      .then(data => {
-        setNotifications(data);
-        toast.success(`Loaded ${data.length} notifications`, { autoClose: 2000 });
-      })
-      .catch(err => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get('/AddNotification');
+        setNotifications(res.data);
+        toast.success(`Loaded ${res.data.length} notifications`, { autoClose: 2000 });
+      } catch (err) {
         console.error("Error fetching notifications:", err);
         toast.error('Failed to load notifications', { autoClose: 2000 });
-      });
+      }
+    };
+    fetchNotifications();
   }, []);
 
   const handleBackClick = () => {

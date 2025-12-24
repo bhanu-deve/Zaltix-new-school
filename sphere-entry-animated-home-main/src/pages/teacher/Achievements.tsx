@@ -207,20 +207,60 @@ const Achievements = () => {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {['student', 'title', 'category', 'date'].map((field) => (
-                    <div key={field} className="space-y-2">
-                      <Label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
-                      <Input
-                        id={field}
-                        name={field}
-                        value={formData[field]}
-                        onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                        placeholder={`Enter ${field}`}
-                        required
-                        type={field === 'date' ? 'date' : 'text'}
-                      />
-                    </div>
-                  ))}
+                  <div className="space-y-2">
+                    <Label htmlFor="student">Student</Label>
+                    <Input
+                      id="student"
+                      name="student"
+                      value={formData.student}
+                      onChange={(e) => setFormData({ ...formData, student: e.target.value })}
+                      placeholder="Enter student name"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      name="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      placeholder="Enter achievement title"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <select
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Academic">Academic</option>
+                      <option value="Sports">Sports</option>
+                      <option value="Arts">Arts</option>
+                      <option value="Leadership">Leadership</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      name="date"
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -324,9 +364,9 @@ const Achievements = () => {
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded text-xs ${
-                              achievement.category === 'Academic'
+                              (achievement.category || '').trim().toLowerCase() === 'academic'
                                 ? 'bg-blue-100 text-blue-800'
-                                : achievement.category === 'Sports'
+                                : (achievement.category || '').trim().toLowerCase() === 'sports'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-purple-100 text-purple-800'
                             }`}

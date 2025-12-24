@@ -7,29 +7,82 @@ import { ArrowLeft, Trophy, Medal, Star, Award } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import { Api_url } from '../config/config.js';
+import api from '../../api/api';
 
 const Achievements = () => {
   const [achievements, setAchievements] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/achievements`)
-      .then(res => res.json())
-      .then(data => {
-        setAchievements(data);
-      })
-      .catch(err => {
+    const fetchAchievements = async () => {
+      try {
+        const res = await api.get('/achievements');
+        setAchievements(res.data);
+      } catch (err) {
         console.error("Error fetching achievements:", err);
-      });
+      }
+    };
+    fetchAchievements();
   }, []);
 
-  const categoryStats = [
-    { category: 'Academic', count: achievements.filter(a => a.category === 'Academic').length, icon: <Star className="w-5 h-5" />, color: 'text-blue-600' },
-    { category: 'Sports', count: achievements.filter(a => a.category === 'Sports').length, icon: <Trophy className="w-5 h-5" />, color: 'text-green-600' },
-    { category: 'Arts', count: achievements.filter(a => a.category === 'Arts').length, icon: <Medal className="w-5 h-5" />, color: 'text-purple-600' },
-    { category: 'Leadership', count: achievements.filter(a => a.category === 'Leadership').length, icon: <Award className="w-5 h-5" />, color: 'text-orange-600' }
-  ];
+  // Calculate dynamic stats
+  const categoryCounts = achievements.reduce((acc: any, curr: any) => {
+    const cat = (curr.category || 'Other').trim();
+    // Normalize key for counting to handle case variations if desired, 
+    // but here we keep original label or capitalize first letter
+    const key = cat.charAt(0).toUpperCase() + cat.slice(1);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Helper for styles
+  const getCategoryStyle = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('academic') || n.includes('science') || n.includes('math') || n.includes('scince')) return { icon: <Star className="w-5 h-5" />, color: 'text-blue-600' };
+    if (n.includes('sport') || n.includes('race') || n.includes('game') || n.includes('athlet')) return { icon: <Trophy className="w-5 h-5" />, color: 'text-green-600' };
+    if (n.includes('art') || n.includes('music') || n.includes('dance') || n.includes('drama')) return { icon: <Medal className="w-5 h-5" />, color: 'text-purple-600' };
+    if (n.includes('leader')) return { icon: <Award className="w-5 h-5" />, color: 'text-orange-600' };
+    return { icon: <Star className="w-5 h-5" />, color: 'text-gray-600' };
+  };
+
+  let dynamicStats = Object.keys(categoryCounts).map(cat => ({
+    category: cat,
+    count: categoryCounts[cat],
+    ...getCategoryStyle(cat)
+  }));
+
+  // Ensure we have at least the standard categories if not present
+  const standardCategories = ['Academic', 'Sports', 'Arts', 'Leadership'];
+  standardCategories.forEach(stdCat => {
+    // Check if a similar category exists (simple check)
+    const exists = dynamicStats.some(ds => ds.category.toLowerCase().includes(stdCat.toLowerCase()) || (stdCat === 'Academic' && (ds.category.toLowerCase().includes('science') || ds.category.toLowerCase().includes('scince')))); 
+    if (!exists && dynamicStats.length < 4) {
+       dynamicStats.push({
+         category: stdCat,
+         count: 0,
+         ...getCategoryStyle(stdCat)
+       });
+    }
+  });
+
+  // Sort by count desc, then fill up to 4 with remaining standards if needed
+  dynamicStats.sort((a, b) => b.count - a.count);
+  
+  // If still less than 4, add remaining standards
+  if (dynamicStats.length < 4) {
+      standardCategories.forEach(stdCat => {
+          const exists = dynamicStats.some(ds => ds.category === stdCat); // Strict check for filling
+          if (!exists && dynamicStats.length < 4) {
+              dynamicStats.push({
+                  category: stdCat,
+                  count: 0,
+                  ...getCategoryStyle(stdCat)
+              });
+          }
+      });
+  }
+
+  const categoryStats = dynamicStats.slice(0, 4);
 
   return (
     <div className="min-h-screen p-4 relative">

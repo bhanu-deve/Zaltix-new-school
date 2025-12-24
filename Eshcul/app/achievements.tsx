@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Card, Title, Paragraph, Button } from 'react-native-paper';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { WebView } from 'react-native-webview';
 // import {Api_url} from './config/config.js'
@@ -24,8 +24,9 @@ interface Achievement {
   student: string;
   date: string;
   description: string;
-  fileUrl: string;
-  fileType: 'pdf' | 'image/jpeg' | 'image/png';
+  category: string;
+  fileUrl: string | null;
+  fileType: string;
 }
 
 // const BASE_URL = 'http://13.203.156.49:5000'; // ✅ Change to your server IP
@@ -57,12 +58,13 @@ const AchievementsScreen = () => {
           student: item.student || 'Unknown',
           date: item.date || '-',
           description: item.description || '-',
+          category: item.category || 'General',
           fileUrl: item.fileUrl?.startsWith('http')
             ? item.fileUrl
             : item.fileUrl?.startsWith('/')
-            ? `http://192.168.29.241:5000${item.fileUrl}`
+            ? `${api.defaults.baseURL}${item.fileUrl}`
             : item.fileUrl
-            ? `http://192.168.29.241:5000/${item.fileUrl}`
+            ? `${api.defaults.baseURL}/${item.fileUrl}`
             : null,
           fileType: item.fileType || 'image/jpeg',
         }));
@@ -89,7 +91,10 @@ const AchievementsScreen = () => {
   };
 
   const handleDownload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !selectedFile.fileUrl) {
+      Alert.alert('Error', 'No file URL available');
+      return;
+    }
 
     try {
       const fileExt = selectedFile.fileType.includes('pdf') ? 'pdf' : 'jpg';
@@ -99,21 +104,19 @@ const AchievementsScreen = () => {
       const fileName = `${safeTitle}_${Date.now()}.${fileExt}`;
       const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
-      const downloadResumable = FileSystem.createDownloadResumable(
+      const { uri } = await FileSystem.downloadAsync(
         selectedFile.fileUrl,
         fileUri
       );
-
-      const { uri } = await downloadResumable.downloadAsync();
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri);
       } else {
         Alert.alert('Downloaded', `File saved to:\n${uri}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Download error:', error);
-      Alert.alert('Error', 'Failed to download file');
+      Alert.alert('Error', `Failed to download file: ${error.message || error}`);
     }
   };
 
@@ -122,9 +125,10 @@ const AchievementsScreen = () => {
       <Card.Content>
         <Title>{item.title}</Title>
         <Paragraph>👤 {item.student}</Paragraph>
+        <Paragraph>🏅 {item.category}</Paragraph>
         <Paragraph>📅 {item.date}</Paragraph>
         <Paragraph>Description: {item.description}</Paragraph>
-        {item.fileType.includes('image') && (
+        {item.fileType.includes('image') && item.fileUrl && (
           <Image source={{ uri: item.fileUrl }} style={styles.image} />
         )}
       </Card.Content>
@@ -178,7 +182,7 @@ const AchievementsScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {selectedFile && (
+            {selectedFile && selectedFile.fileUrl && (
               <>
                 <Text style={styles.modalTitle}>{selectedFile.title}</Text>
                 {selectedFile.fileType.includes('pdf') ? (

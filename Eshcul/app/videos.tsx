@@ -36,7 +36,17 @@ export default function VideosScreen() {
     try {
       const res = await api.get(`/videos`);
       if (Array.isArray(res.data)) {
-        setVideos(res.data);
+        const formatted = res.data.map((item: any) => ({
+          ...item,
+          thumbnail: item.thumbnail?.startsWith('http')
+            ? item.thumbnail
+            : item.thumbnail?.startsWith('/')
+            ? `${api.defaults.baseURL}${item.thumbnail}`
+            : item.thumbnail
+            ? `${api.defaults.baseURL}/${item.thumbnail}`
+            : null,
+        }));
+        setVideos(formatted);
       } else {
         setVideos([]);
         Alert.alert('Error', 'Unexpected API response format');
@@ -85,7 +95,7 @@ export default function VideosScreen() {
                 style={styles.videoCard}
                 onPress={() => openLink(item.url)}
               >
-                {item.thumbnail && item.thumbnail.startsWith('http') ? (
+                {item.thumbnail ? (
                   <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
                 ) : (
                   <View style={styles.iconWrapper}>
