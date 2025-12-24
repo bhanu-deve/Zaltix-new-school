@@ -3,7 +3,7 @@ import axios from 'axios';
 const api = axios.create({
   // Update this to your backend server address
   // For local development, use your computer's IP address
-  baseURL: 'http://192.168.29.241:5000',
+  baseURL: 'http://192.168.29.126:5000',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
