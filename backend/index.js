@@ -24,6 +24,7 @@ import AddBus from "./routes/AddbusRoute.js";
 import AddStudentBus from "./routes/AddStudentBusRoute.js";
 import StudentFeedback from './routes/AddStudentFeedbackRoute.js';
 import AuthRoute from "./routes/authRoute.js";
+import AddStudent from "./routes/AddStudentRoute.js";
 
 
 import { Db } from './config/db.js';
@@ -58,6 +59,9 @@ app.use('/timetable', Timetable);
 app.use("/addbus", AddBus);
 app.use('/addstudentbus', AddStudentBus);
 app.use('/studentfeedback', StudentFeedback);
+app.use("/students", AddStudent);
+app.use(express.urlencoded({ extended: true }));
+
 
 Db.on('error', (err) => console.error('MongoDB error:', err));
 

@@ -1,9 +1,8 @@
-import express from 'express';
-import { addStudent } from '../controllers/studentController.js';
+import express from "express";
+import { addStudent } from "../controllers/AddStudentController.js";
 
 const router = express.Router();
 
-router.post('/Addstudent', addStudent);
-
+router.post("/", addStudent);
 
 export default router;

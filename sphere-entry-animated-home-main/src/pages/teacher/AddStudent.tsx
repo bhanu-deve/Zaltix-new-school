@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, UserPlus, Calendar, Eye, EyeOff, Copy } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import api from "@/api/api";
 
 interface StudentFormData {
   firstName: string;
@@ -102,22 +103,24 @@ const AddStudent: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Validate required fields
-    if (!formData.dateOfBirth || !formData.password) {
-      alert('Please enter date of birth to generate password.');
-      return;
-    }
+ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    // Here you would typically make an API call to add the student
-    console.log('Form submitted:', formData);
-    
-    // Show success message with student details
-    alert(`Student added successfully!\n\nStudent Details:\nName: ${formData.firstName} ${formData.lastName}\nRoll Number: ${formData.rollNumber}\nPassword: ${formData.password}\n\nPlease share this password with the student.`);
-    
-    // Reset form
+  if (!formData.dateOfBirth || !formData.password) {
+    alert("Please enter date of birth to generate password.");
+    return;
+  }
+
+  try {
+    const response = await api.post("/students", formData);
+
+    alert(
+      `Student added successfully!\n\n` +
+      `Name: ${formData.firstName} ${formData.lastName}\n` +
+      `Roll Number: ${formData.rollNumber}\n` +
+      `Password: ${formData.password}`
+    );
+
     setFormData({
       firstName: '',
       lastName: '',
@@ -132,8 +135,14 @@ const AddStudent: React.FC = () => {
       parentEmail: '',
       address: ''
     });
+
     setIsPasswordGenerated(false);
-  };
+
+  } catch (error: any) {
+    alert(error.response?.data?.message || "Failed to add student");
+  }
+ };
+
 
   return (
     <div className="min-h-screen p-4 relative">
