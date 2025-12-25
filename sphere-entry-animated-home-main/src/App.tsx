@@ -127,6 +127,8 @@ import PrincipalNotifications from "./pages/principal/Notifications";
 import PrincipalAchievements from "./pages/principal/Achievements";
 import PrincipalFeedback from "./pages/principal/Feedback";
 import AddBus from './pages/principal/BusTracking'
+import PrincipalStudents from "./pages/principal/PrincipalStudents";
+
 
 const queryClient = new QueryClient();
 
@@ -170,6 +172,11 @@ const App = () => (
           <Route path="/dashboard/principal/achievements" element={<PrincipalAchievements />} />
           <Route path="/dashboard/principal/feedback" element={<PrincipalFeedback />} />
           <Route path="/dashboard/principal/bus" element={<AddBus />} />
+          <Route
+            path="/dashboard/principal/students"
+            element={<PrincipalStudents />}
+          />
+
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

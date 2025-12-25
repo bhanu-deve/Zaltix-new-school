@@ -246,7 +246,15 @@ const PrincipalDashboard = () => {
       icon: <Bus className="w-6 h-6" />,
       path: '/dashboard/principal/bus',
       gradient: 'bg-gradient-to-br from-emerald-200 to-emerald-300'
+    },
+    {
+      title: 'Students',
+      description: 'View all student records',
+      icon: <Users className="w-6 h-6" />,
+      path: '/dashboard/principal/students',
+      gradient: 'bg-gradient-to-br from-sky-200 to-sky-300'
     }
+
   ];
 
   return (
