@@ -1,6 +1,7 @@
 import { AddStaff } from "../models/AddStaff.js";
 import User from "../models/User.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
+
 
 /**
  * GET all staff members

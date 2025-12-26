@@ -1,5 +1,5 @@
 // SettingsScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import api from '@/api/api';
 
 export default function SettingsScreen() {
   const router = useRouter();
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
+
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,17 +30,33 @@ export default function SettingsScreen() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleLogout = () => {
+  const [student, setStudent] = useState<any>(null);
+
+  // ================= LOAD STUDENT =================
+  useEffect(() => {
+    const loadStudent = async () => {
+      const stored = await AsyncStorage.getItem('student');
+      if (stored) setStudent(JSON.parse(stored));
+    };
+    loadStudent();
+  }, []);
+
+  // ================= LOGOUT =================
+  const handleLogout = async () => {
     Toast.show({
       type: 'info',
       text1: 'Logging out...',
       text2: 'You will be redirected shortly.',
     });
+
+    await AsyncStorage.multiRemove(['token', 'student']);
+
     setTimeout(() => {
       router.replace('/');
     }, 1500);
   };
 
+  // ================= CHANGE PASSWORD =================
   const handleChangePassword = async () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
       Toast.show({
@@ -57,30 +76,39 @@ export default function SettingsScreen() {
       return;
     }
 
-    const currentPassword = await AsyncStorage.getItem('password') || 'mypassword';
-
-    if (oldPassword !== currentPassword) {
+    if (newPassword.length < 6) {
       Toast.show({
         type: 'error',
-        text1: 'Incorrect Password',
-        text2: 'Old password is incorrect.',
+        text1: 'Password must be at least 6 characters',
       });
       return;
     }
 
-    await AsyncStorage.setItem('password', newPassword);
-    Toast.show({
-      type: 'success',
-      text1: 'Password Updated',
-      text2: 'Your password was updated successfully.',
-    });
+    try {
+      await api.put('/student-auth/change-password', {
+        oldPassword,
+        newPassword,
+      });
 
-    setOldPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setShowChangePassword(false);
+      Toast.show({
+        type: 'success',
+        text1: 'Password Updated',
+        text2: 'Your password was updated successfully.',
+      });
+
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowChangePassword(false);
+    } catch (err: any) {
+      Toast.show({
+        type: 'error',
+        text1: err?.response?.data?.message || 'Password update failed',
+      });
+    }
   };
 
+  // ================= HELP & INFO =================
   const handleHelpSupport = () => {
     Toast.show({
       type: 'info',
@@ -104,8 +132,10 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.profileCard}>
           <Ionicons name="person-circle" size={64} color="#008080" />
-          <Text style={styles.profileName}>Anjali</Text>
-          <Text style={styles.profileSubtext}>Class: 10 - A | Roll No: 02</Text>
+          <Text style={styles.profileName}>{student?.name}</Text>
+          <Text style={styles.profileSubtext}>
+            Class: {student?.grade} - {student?.section} | Roll No: {student?.rollNumber}
+          </Text>
         </View>
 
         <View style={styles.settingGroup}>
@@ -114,6 +144,7 @@ export default function SettingsScreen() {
             text="Change Password"
             onPress={() => setShowChangePassword(!showChangePassword)}
           />
+
           {showChangePassword && (
             <View style={styles.passwordForm}>
               <PasswordInput
@@ -160,11 +191,12 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Toast container */}
       <Toast />
     </LinearGradient>
   );
 }
+
+// ================= COMPONENTS =================
 
 const PasswordInput = ({ placeholder, value, onChange, visible, toggle }: any) => (
   <View style={styles.inputWrapper}>
@@ -181,17 +213,7 @@ const PasswordInput = ({ placeholder, value, onChange, visible, toggle }: any) =
   </View>
 );
 
-const SettingItem = ({
-  icon,
-  text,
-  children,
-  onPress,
-}: {
-  icon: any;
-  text: string;
-  children?: React.ReactNode;
-  onPress?: () => void;
-}) => (
+const SettingItem = ({ icon, text, children, onPress }: any) => (
   <TouchableOpacity style={styles.settingItem} onPress={onPress} activeOpacity={0.7}>
     <View style={styles.settingLeft}>
       <Ionicons name={icon} size={24} color="#008080" />
@@ -200,6 +222,8 @@ const SettingItem = ({
     {children ?? <Ionicons name="chevron-forward" size={20} color="#888" />}
   </TouchableOpacity>
 );
+
+// ================= STYLES (UNCHANGED) =================
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

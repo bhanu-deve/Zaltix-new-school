@@ -1,4 +1,5 @@
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
+
 import Student from "../models/StudentRegistration.js";
 
 export const addStudent = async (req, res) => {

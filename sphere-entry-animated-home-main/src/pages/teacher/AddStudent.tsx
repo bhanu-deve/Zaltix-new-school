@@ -45,14 +45,11 @@ const AddStudent: React.FC = () => {
 
   // Generate password from date of birth
   const generatePasswordFromDOB = (dob: string): string => {
-    if (!dob) return '';
-    // Format: DDMMYYYY (e.g., 15032012 for 15th March 2012)
-    const date = new Date(dob);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    // dob format: YYYY-MM-DD
+    const [year, month, day] = dob.split("-");
     return `${day}${month}${year}`;
   };
+
 
   // Handle date of birth change
   const handleDateOfBirthChange = (e: ChangeEvent<HTMLInputElement>) => {

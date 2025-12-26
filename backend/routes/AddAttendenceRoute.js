@@ -10,6 +10,8 @@ import {
 
 import Attendance from "../models/AddAttendence.js";
 import StudentRegistration from "../models/StudentRegistration.js";
+import jwt from "jsonwebtoken";
+
 
 const router = express.Router();
 
@@ -329,5 +331,57 @@ router.get("/classes", async (req, res) => {
   const classes = [...new Set(students.map(s => `${s.grade}${s.section}`))];
   res.json(classes);
 });
+
+/* =========================================================
+   STUDENT – GET OWN ATTENDANCE (BY ROLL NUMBER)
+   ========================================================= */
+  // router.get("/student/:rollNumber", async (req, res) => {
+  //   try {
+  //     const { rollNumber } = req.params;
+
+  //     const record = await Attendance.findOne({
+  //       "student.rollNo": String(rollNumber),
+  //     });
+
+  //     if (!record) {
+  //       return res.status(404).json({ error: "Attendance not found" });
+  //     }
+
+  //     res.json(record);
+  //   } catch (e) {
+  //     console.error("STUDENT ATTENDANCE ERROR:", e);
+  //     res.status(500).json({ error: "Failed to fetch attendance" });
+  //   }
+
+  // });
+
+  
+  /* =========================================================
+   STUDENT – GET OWN ATTENDANCE (BY ROLL NUMBER)
+   ========================================================= */
+router.get("/by-roll", async (req, res) => {
+  try {
+    const { rollNumber } = req.query;
+
+    if (!rollNumber) {
+      return res.status(400).json({ error: "rollNumber is required" });
+    }
+
+    const record = await Attendance.findOne({
+      "student.rollNo": String(rollNumber).trim()
+    });
+
+    if (!record) {
+      return res.json({ attendance: [] });
+    }
+
+    res.json(record);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to fetch attendance" });
+  }
+});
+
+
 
 export default router;

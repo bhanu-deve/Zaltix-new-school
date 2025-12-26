@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState , useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,66 +10,68 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message'; // ✅ Toast import
+import Toast from 'react-native-toast-message';
+
+import api from "../api/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const unstable_settings = {
   headerShown: false,
 };
 
+
+
 export default function LoginPage() {
   const [admissionNumber, setAdmissionNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [storedCredentials, setStoredCredentials] = useState(null);
   const router = useRouter();
+    /* ✅ CLEAR OLD TOKEN ONCE (FIX INVALID TOKEN ISSUE) */
+    useEffect(() => {
+      AsyncStorage.clear();
+    }, []);
 
-  useEffect(() => {
-    const initializeCredentials = async () => {
-      const existingAdmission = await AsyncStorage.getItem('admissionNumber');
-      const existingPassword = await AsyncStorage.getItem('password');
-
-      if (!existingAdmission || !existingPassword) {
-        await AsyncStorage.setItem('admissionNumber', '12345');
-        await AsyncStorage.setItem('password', 'mypassword');
-      }
-
-      const storedAdmission = await AsyncStorage.getItem('admissionNumber');
-      const storedPassword = await AsyncStorage.getItem('password');
-
-      setStoredCredentials({
-        admissionNumber: storedAdmission,
-        password: storedPassword,
-      });
-    };
-
-    initializeCredentials();
-  }, []);
-
-  const handleSignIn = () => {
-    if (
-      admissionNumber === storedCredentials?.admissionNumber &&
-      password === storedCredentials?.password
-    ) {
+  /* ===================== LOGIN HANDLER ===================== */
+  const handleSignIn = async () => {
+    if (!admissionNumber || !password) {
       Toast.show({
-        type: 'success',
-        text1: 'Login Successful 🎉',
-        text2: 'Welcome back!',
-        position: 'top',
-        visibilityTime: 2000,
+        type: "error",
+        text1: "Please enter all fields",
       });
-      setTimeout(() => {
-        router.replace('/(tabs)/home');
-      }, 1800);
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: 'Login Failed 😔',
-        text2: 'Invalid admission number or password.',
-        position: 'top',
-        visibilityTime: 2500,
-      });
+      return;
     }
+
+    try {
+     const res = await api.post("/student-auth/login", {
+        rollNumber: admissionNumber,
+        password,
+      });
+
+      console.log("LOGIN API RESPONSE:", res.data);
+
+
+
+      // Save JWT & student profile
+      await AsyncStorage.setItem("token", res.data.token);
+      await AsyncStorage.setItem("student", JSON.stringify(res.data.student));
+
+      Toast.show({
+        type: "success",
+        text1: "Login Successful 🎉",
+      });
+
+      router.replace("/(tabs)/home");
+    } catch (err: any) {
+        console.log("❌ LOGIN ERROR FULL:", err);
+        console.log("❌ LOGIN ERROR RESPONSE:", err?.response);
+        console.log("❌ LOGIN ERROR DATA:", err?.response?.data);
+        console.log("❌ LOGIN ERROR STATUS:", err?.response?.status);
+
+        Toast.show({
+          type: "error",
+          text1: err?.response?.data?.error || "Login failed",
+        });
+      }
   };
 
   return (
@@ -79,6 +81,7 @@ export default function LoginPage() {
         style={styles.backgroundGif}
         resizeMode="cover"
       />
+
       <View style={styles.vectorContainer}>
         <Image
           source={require('../assets/school-vector.png')}
@@ -87,12 +90,14 @@ export default function LoginPage() {
         />
         <BlurView intensity={50} style={StyleSheet.absoluteFill} />
       </View>
+
       <View style={styles.overlay}>
         <Image
           source={require('../assets/logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
+
         <View style={styles.form}>
           <Text style={styles.title}>Login</Text>
 
@@ -120,16 +125,22 @@ export default function LoginPage() {
               onPress={() => setShowPassword(!showPassword)}
               style={styles.eyeIcon}
             >
-              <Text style={{ fontSize: 18 }}>{showPassword ? '🙈' : '👁'}</Text>
+              <Text style={{ fontSize: 18 }}>
+                {showPassword ? '🙈' : '👁'}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity onPress={() => Toast.show({
-            type: 'info',
-            text1: 'Reset Sent ✉️',
-            text2: 'Check your email for reset instructions.',
-            position: 'bottom'
-          })}>
+          <TouchableOpacity
+            onPress={() =>
+              Toast.show({
+                type: 'info',
+                text1: 'Password reset',
+                text2: 'Please contact your school admin',
+                position: 'bottom',
+              })
+            }
+          >
             <Text style={styles.forgot}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -145,6 +156,7 @@ export default function LoginPage() {
   );
 }
 
+/* ===================== STYLES (UNCHANGED) ===================== */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

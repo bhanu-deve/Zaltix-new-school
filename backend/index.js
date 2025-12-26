@@ -25,6 +25,8 @@ import AddStudentBus from "./routes/AddStudentBusRoute.js";
 import StudentFeedback from './routes/AddStudentFeedbackRoute.js';
 import AuthRoute from "./routes/authRoute.js";
 import AddStudent from "./routes/AddStudentRoute.js";
+import studentAuthRoute from "./routes/studentAuthRoute.js";
+
 
 
 import { Db } from './config/db.js';
@@ -35,6 +37,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", AuthRoute);
+
+app.use("/student-auth", studentAuthRoute);
+
+
 
 
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
