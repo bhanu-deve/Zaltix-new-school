@@ -360,8 +360,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from "@/api/api";
 
-const examTypes = ['FA1', 'FA2', 'FA3', 'SA1', 'SA2', 'SA3', 'FINAL'];
-
 const Reports = () => {
   const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState('10A');
@@ -374,7 +372,7 @@ const Reports = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [editMarks, setEditMarks] = useState({});
   const [newStudent, setNewStudent] = useState({ name: '', rollNo: '' });
-  const [newSubjects, setNewSubjects] = useState(['']); // Dynamic subject inputs
+  const [newSubjects, setNewSubjects] = useState(['']);
 
   const calculateGrade = (marks) => {
     const avg = marks.reduce((a, b) => a + b, 0) / marks.length;
@@ -393,17 +391,16 @@ const Reports = () => {
       const res = await api.get(`/subjects/${className}/${examType}`);
       setSubjects(res.data.subjects || []);
     } catch (err) {
-      setSubjects(['math', 'english', 'science']);
-      console.error('Using default subjects');
+      setSubjects([]);
     }
   };
 
   const fetchStudents = async (className, examType) => {
     try {
       const res = await api.get(`/grades/${className}/${examType}`);
-      setStudents(res.data);
+      setStudents(res.data || []);
     } catch (err) {
-      toast.error('Failed to fetch students');
+      setStudents([]);
     }
   };
 
@@ -451,6 +448,11 @@ const Reports = () => {
       toast.warn('Please enter name and roll number');
       return;
     }
+    if (subjects.length === 0) {
+      toast.warn('⚠️ Please set subjects first');
+      setShowSubjectsModal(true);
+      return;
+    }
 
     const marksObj = {};
     subjects.forEach(subject => {
@@ -492,7 +494,6 @@ const Reports = () => {
     }
   };
 
-  // DYNAMIC SUBJECTS MANAGEMENT
   const addSubjectField = () => {
     setNewSubjects([...newSubjects, '']);
   };
@@ -510,23 +511,41 @@ const Reports = () => {
     setNewSubjects(updated);
   };
 
-  const saveSubjects = async () => {
-    const validSubjects = newSubjects
-      .map(subject => subject.trim().toLowerCase().replace(/\s+/g, '_'))
-      .filter(subject => subject && !subjects.includes(subject));
+  // 🔥 ADD/REMOVE SUBJECTS FROM CURRENT LIST
+  const removeCurrentSubject = async (subjectIndex) => {
+    if (!window.confirm('Remove this subject? All student marks for this subject will be lost.')) return;
     
-    if (validSubjects.length === 0) {
-      toast.warn('No new valid subjects to add');
+    const newSubjectList = subjects.filter((_, index) => index !== subjectIndex);
+    
+    try {
+      await api.post(`/subjects/${selectedClass}/${selectedExamType}`, {
+        subjects: newSubjectList
+      });
+      setSubjects(newSubjectList);
+      toast.success('✅ Subject removed');
+    } catch (err) {
+      toast.error('❌ Failed to remove subject');
+    }
+  };
+
+  const saveSubjects = async () => {
+    const inputSubjects = newSubjects
+      .map(subject => subject.trim().toLowerCase().replace(/\s+/g, '_'))
+      .filter(subject => subject.length > 0);
+    
+    if (inputSubjects.length === 0) {
+      toast.warn('Please enter at least one subject');
       return;
     }
 
     try {
       await api.post(`/subjects/${selectedClass}/${selectedExamType}`, {
-        subjects: [...subjects, ...validSubjects]
+        subjects: inputSubjects
       });
-      setSubjects([...subjects, ...validSubjects]);
+      setSubjects(inputSubjects);
       setShowSubjectsModal(false);
-      toast.success(`✅ Added ${validSubjects.length} subject(s)`);
+      setNewSubjects(['']);
+      toast.success(`✅ Set ${inputSubjects.length} subjects`);
     } catch (err) {
       toast.error('❌ Failed to save subjects');
     }
@@ -540,7 +559,7 @@ const Reports = () => {
     <div className="min-h-screen p-4 bg-gradient-to-br from-indigo-50 to-purple-50">
       <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header - ORIGINAL STYLE */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div className="flex items-center space-x-4">
             <Button onClick={() => navigate('/dashboard/teacher')} variant="outline" size="sm">
@@ -568,7 +587,7 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters - ORIGINAL STYLE */}
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
@@ -592,7 +611,7 @@ const Reports = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {examTypes.map((exam) => (
+                    {['FA1', 'FA2', 'FA3', 'SA1', 'SA2', 'SA3', 'FINAL'].map((exam) => (
                       <SelectItem key={exam} value={exam}>{exam}</SelectItem>
                     ))}
                   </SelectContent>
@@ -601,13 +620,14 @@ const Reports = () => {
               <div className="text-right">
                 <span className="text-sm text-gray-600">
                   Active Subjects: <span className="font-bold text-2xl text-purple-600">{subjects.length}</span>
+                  {subjects.length === 0 && <span className="block text-xs text-red-500 mt-1">Click Subjects button to set</span>}
                 </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Students Table */}
+        {/* Table - ORIGINAL STYLE */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -636,7 +656,14 @@ const Reports = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.length === 0 ? (
+                  {subjects.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={20} className="text-center py-12 text-gray-500">
+                        📚 No subjects set for {selectedClass} {selectedExamType}<br />
+                        <small>Click "Subjects ({subjects.length})" button above</small>
+                      </TableCell>
+                    </TableRow>
+                  ) : students.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={subjects.length + 7} className="text-center py-12 text-gray-500">
                         📝 No student data for {selectedExamType} exam<br />
@@ -700,7 +727,7 @@ const Reports = () => {
           </CardContent>
         </Card>
 
-        {/* Edit Dialog */}
+        {/* Edit & Add Modals - SAME AS ORIGINAL */}
         <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
           <DialogContent className="max-w-2xl max-h-[90vh]">
             <DialogHeader>
@@ -740,7 +767,6 @@ const Reports = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Add Student Dialog */}
         <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
@@ -800,7 +826,7 @@ const Reports = () => {
           </DialogContent>
         </Dialog>
 
-        {/* UNLIMITED SUBJECTS MANAGEMENT DIALOG */}
+        {/* 🔥 SUBJECTS MODAL WITH REMOVE BUTTONS */}
         <Dialog open={showSubjectsModal} onOpenChange={setShowSubjectsModal}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -810,21 +836,34 @@ const Reports = () => {
               </p>
             </DialogHeader>
             <div className="space-y-4">
-              {/* Current Subjects */}
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium mb-2 flex items-center gap-2">
-                  📚 Current Subjects ({subjects.length})
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {subjects.map((subject, index) => (
-                    <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                      {formatSubjectName(subject)}
-                    </span>
-                  ))}
+              {/* 🔥 CURRENT SUBJECTS WITH DELETE BUTTONS */}
+              {subjects.length > 0 && (
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    📚 Current Subjects ({subjects.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {subjects.map((subject, index) => (
+                      <div key={index} className="flex items-center gap-2 bg-red-50 border border-red-200 px-3 py-2 rounded-full">
+                        <span className="text-sm font-medium text-red-800">
+                          {formatSubjectName(subject)}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeCurrentSubject(index)}
+                          className="h-7 w-7 p-0 ml-1"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Add New Subjects */}
+              {/* ADD NEW SUBJECTS */}
               <div>
                 <Label className="text-lg font-semibold mb-3 block">➕ Add New Subjects</Label>
                 <div className="space-y-2 max-h-64 overflow-y-auto p-2 border rounded-lg bg-yellow-50">

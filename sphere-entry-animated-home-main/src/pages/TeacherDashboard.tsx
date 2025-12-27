@@ -148,8 +148,8 @@ const TeacherDashboard = () => {
       <AnimatedBackground />
 
       <div className="max-w-6xl mx-auto h-screen flex flex-col">
-        {/* Positioned slightly higher - reduced padding-top */}
-        <div className="pt-16 flex-grow flex items-center justify-center">
+        {/* Moved UP more - pt-13 (from pt-14) */}
+        <div className="pt-13 flex-grow flex items-center justify-center">
           <div className="w-full">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-center mb-8 animate-fade-in-up gap-4">
@@ -173,7 +173,7 @@ const TeacherDashboard = () => {
               </Button>
             </div>
 
-            {/* Dashboard Grid with brighter cards */}
+            {/* Dashboard Grid - unchanged */}
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
               {dashboardItems.map((item, index) => (
                 <Card
