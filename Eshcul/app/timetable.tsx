@@ -161,15 +161,241 @@
 //   },
 // });
 
+// ============================================================================================================
+// import React, { useEffect, useState } from 'react';
+// import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import api from '../api/api';
 
+// export default function TimetableScreen() {
+//   const [timetable, setTimetable] = useState<any>(null);
+//   const [loading, setLoading] = useState(true);
+
+//   const className = '10A';
+
+//   const periodTimeMap: { [key: number]: string } = {
+//     0: '9:00 - 10:00',
+//     1: '10:00 - 11:00',
+//     2: '11:00 - 12:00',
+//     3: '12:00 - 1:00',
+//     4: '2:00 - 3:00',
+//     5: '3:00 - 4:00',
+//   };
+
+//   useEffect(() => {
+//     const fetchTimetable = async () => {
+//       try {
+//         const res = await api.get(`/timetable/${className}`);
+//         console.log('Fetched timetable:', res.data);
+//         setTimetable(res.data.data);
+//       } catch (err) {
+//         console.error('Failed to fetch timetable:', err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchTimetable();
+//   }, []);
+
+//   if (loading) {
+//     return (
+//       <View style={styles.centered}>
+//         <ActivityIndicator size="large" color="#2563eb" />
+//       </View>
+//     );
+//   }
+
+//   if (!timetable || !timetable.entries || Object.keys(timetable.entries).length === 0) {
+//     return (
+//       <View style={styles.centered}>
+//         <Text style={{ color: '#333' }}>No timetable data found.</Text>
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <LinearGradient
+//       colors={['#edf5ff', '#fdfdfd']}
+//       start={{ x: 0, y: 0 }}
+//       end={{ x: 0, y: 1 }}
+//       style={styles.gradientContainer}
+//     >
+//       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+//         {/* header chip */}
+//         <LinearGradient
+//           colors={['#dbeafe', '#e0f2fe']}
+//           start={{ x: 0, y: 0 }}
+//           end={{ x: 1, y: 1 }}
+//           style={styles.headerChip}
+//         >
+//           <View>
+//             <Text style={styles.headerTitle}>Timetable</Text>
+//             <Text style={styles.headerSubtitle}>
+//               Class {timetable.className} • Section {timetable.section}
+//             </Text>
+//           </View>
+//           <View style={styles.headerBadge}>
+//             <Text style={styles.headerBadgeLabel}>Year</Text>
+//             <Text style={styles.headerBadgeValue}>{timetable.academicYear}</Text>
+//           </View>
+//         </LinearGradient>
+
+//         {/* timetable card */}
+//         <View style={styles.timetableCard}>
+//   {Object.entries(timetable.entries as Record<string, string[]>).map(
+//     ([day, dailyEntries]) => (
+//       <View key={day} style={styles.dayBlock}>
+//         <View style={styles.dayHeaderRow}>
+//           <Text style={styles.dayHeaderText}>{day}</Text>
+//         </View>
+
+//         {dailyEntries.map((subject, index) => (
+//           <View key={index} style={styles.periodCard}>
+//             <View style={styles.periodLeft}>
+//               <Text style={styles.periodLabel}>Period {index + 1}</Text>
+//               <Text style={styles.periodTime}>{periodTimeMap[index]}</Text>
+//             </View>
+//             <View style={styles.subjectPill}>
+//               <Text style={styles.subjectText}>{subject}</Text>
+//             </View>
+//           </View>
+//         ))}
+//       </View>
+//     ),
+//   )}
+// </View>
+//       </ScrollView>
+//     </LinearGradient>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   gradientContainer: { flex: 1 },
+//   container: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 32 },
+
+//   /* header */
+//   headerChip: {
+//     borderRadius: 22,
+//     paddingHorizontal: 18,
+//     paddingVertical: 14,
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginBottom: 18,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.06,
+//     shadowRadius: 8,
+//     shadowOffset: { width: 0, height: 3 },
+//     elevation: 3,
+//   },
+//   headerTitle: {
+//     fontSize: 20,
+//     fontWeight: '700',
+//     color: '#0f172a',
+//   },
+//   headerSubtitle: {
+//     marginTop: 4,
+//     fontSize: 13,
+//     color: '#4b5563',
+//   },
+//   headerBadge: {
+//     backgroundColor: '#fff7ed',
+//     borderRadius: 999,
+//     paddingHorizontal: 12,
+//     paddingVertical: 6,
+//     alignItems: 'flex-end',
+//   },
+//   headerBadgeLabel: {
+//     fontSize: 11,
+//     color: '#9a3412',
+//   },
+//   headerBadgeValue: {
+//     fontSize: 14,
+//     fontWeight: '700',
+//     color: '#c05621',
+//   },
+
+//   /* main card */
+//   timetableCard: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 20,
+//     paddingHorizontal: 14,
+//     paddingVertical: 16,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.04,
+//     shadowRadius: 8,
+//     shadowOffset: { width: 0, height: 2 },
+//     elevation: 3,
+//   },
+
+//   dayBlock: {
+//     marginBottom: 20,
+//   },
+//   dayHeaderRow: {
+//     alignSelf: 'flex-start',
+//     backgroundColor: '#e0f2fe',
+//     borderRadius: 999,
+//     paddingHorizontal: 14,
+//     paddingVertical: 6,
+//     marginBottom: 10,
+//   },
+//   dayHeaderText: {
+//     fontSize: 13,
+//     fontWeight: '700',
+//     color: '#1d4ed8',
+//   },
+
+//   periodCard: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     borderRadius: 14,
+//     paddingHorizontal: 12,
+//     paddingVertical: 10,
+//     marginBottom: 8,
+//     backgroundColor: '#f9fafb',
+//   },
+//   periodLeft: {
+//     flex: 1,
+//   },
+//   periodLabel: {
+//     fontSize: 13,
+//     fontWeight: '600',
+//     color: '#4b5563',
+//   },
+//   periodTime: {
+//     fontSize: 12,
+//     color: '#9ca3af',
+//     marginTop: 2,
+//   },
+//   subjectPill: {
+//     paddingHorizontal: 10,
+//     paddingVertical: 6,
+//     borderRadius: 999,
+//     backgroundColor: '#e0f7fa',
+//   },
+//   subjectText: {
+//     fontSize: 13,
+//     fontWeight: '600',
+//     color: '#006064',
+//   },
+
+//   centered: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+// });
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import api from '../api/api';
 
 export default function TimetableScreen() {
   const [timetable, setTimetable] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState('Monday');
 
   const className = '10A';
 
@@ -181,6 +407,8 @@ export default function TimetableScreen() {
     4: '2:00 - 3:00',
     5: '3:00 - 4:00',
   };
+
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   useEffect(() => {
     const fetchTimetable = async () => {
@@ -214,6 +442,8 @@ export default function TimetableScreen() {
     );
   }
 
+  const currentDayEntries = timetable.entries[selectedDay] || [];
+
   return (
     <LinearGradient
       colors={['#edf5ff', '#fdfdfd']}
@@ -222,7 +452,7 @@ export default function TimetableScreen() {
       style={styles.gradientContainer}
     >
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* header chip */}
+        {/* Header chip */}
         <LinearGradient
           colors={['#dbeafe', '#e0f2fe']}
           start={{ x: 0, y: 0 }}
@@ -241,40 +471,114 @@ export default function TimetableScreen() {
           </View>
         </LinearGradient>
 
-        {/* timetable card */}
-        <View style={styles.timetableCard}>
-  {Object.entries(timetable.entries as Record<string, string[]>).map(
-    ([day, dailyEntries]) => (
-      <View key={day} style={styles.dayBlock}>
-        <View style={styles.dayHeaderRow}>
-          <Text style={styles.dayHeaderText}>{day}</Text>
+        {/* Compact Day selector */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.daySelectorContainer}
+          contentContainerStyle={styles.daySelectorContent}
+        >
+          {days.map((day) => (
+            <TouchableOpacity
+              key={day}
+              style={[
+                styles.dayChip,
+                selectedDay === day && styles.dayChipSelected
+              ]}
+              onPress={() => setSelectedDay(day)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.dayChipText,
+                selectedDay === day && styles.dayChipTextSelected
+              ]}>
+                {day.slice(0,3)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* 3-Column Timetable Table */}
+        <View style={styles.timetableSheet}>
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetDayTitle}>{selectedDay}</Text>
+          </View>
+
+          {currentDayEntries.length === 0 ? (
+            <View style={styles.emptySchedule}>
+              <Text style={styles.emptyScheduleText}>No classes</Text>
+            </View>
+          ) : (
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Period</Text>
+                <Text style={styles.tableHeaderText}>Time</Text>
+                <Text style={styles.tableHeaderText}>Subject / Teacher</Text>
+              </View>
+              
+              {currentDayEntries.map((subject: string, index: number) => {
+                const teacher = timetable.subjects?.[subject]?.teacher || 'TBD';
+                return (
+                  <View key={index} style={styles.tableRow}>
+                    <View style={styles.periodCell}>
+                      <Text style={styles.periodNumber}>P{index + 1}</Text>
+                    </View>
+                    <View style={styles.timeCell}>
+                      <Text style={styles.timeText}>{periodTimeMap[index]}</Text>
+                    </View>
+                    <View style={styles.subjectCell}>
+                      <Text style={styles.subjectText}>{subject}</Text>
+                      <Text style={styles.teacherText}>{teacher}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </View>
 
-        {dailyEntries.map((subject, index) => (
-          <View key={index} style={styles.periodCard}>
-            <View style={styles.periodLeft}>
-              <Text style={styles.periodLabel}>Period {index + 1}</Text>
-              <Text style={styles.periodTime}>{periodTimeMap[index]}</Text>
-            </View>
-            <View style={styles.subjectPill}>
-              <Text style={styles.subjectText}>{subject}</Text>
-            </View>
+        {/* Compact Subjects Section */}
+        <View style={styles.subjectsSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Subjects</Text>
           </View>
-        ))}
-      </View>
-    ),
-  )}
-</View>
+
+          {timetable.subjects && Object.keys(timetable.subjects).length > 0 ? (
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.subjectsHorizontalScroll}
+            >
+              {Object.entries(timetable.subjects).map(([subjectName, subjectData]: [string, any]) => (
+                <View key={subjectName} style={styles.compactSubjectCard}>
+                  <View style={[styles.compactSubjectColor, { backgroundColor: getSubjectColor(subjectName) }]}>
+                    <Text style={styles.compactSubjectInitial}>{subjectName.charAt(0)}</Text>
+                  </View>
+                  <Text style={styles.compactSubjectName} numberOfLines={1}>{subjectName}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.noSubjects}>
+              <Text style={styles.noSubjectsText}>No subjects</Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </LinearGradient>
   );
 }
 
+const getSubjectColor = (subjectName: string) => {
+  const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+  return colors[subjectName.charCodeAt(0) % colors.length];
+};
+
 const styles = StyleSheet.create({
   gradientContainer: { flex: 1 },
   container: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 32 },
 
-  /* header */
+  /* Header */
   headerChip: {
     borderRadius: 22,
     paddingHorizontal: 18,
@@ -282,7 +586,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -316,68 +620,181 @@ const styles = StyleSheet.create({
     color: '#c05621',
   },
 
-  /* main card */
-  timetableCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
+  /* Day Selector */
+  daySelectorContainer: {
+    marginBottom: 12,
+  },
+  daySelectorContent: {
+    gap: 8,
+  },
+  dayChip: {
     paddingHorizontal: 14,
-    paddingVertical: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  dayChipSelected: {
+    backgroundColor: '#3b82f6',
+    borderColor: '#2563eb',
+  },
+  dayChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  dayChipTextSelected: {
+    color: '#ffffff',
   },
 
-  dayBlock: {
-    marginBottom: 20,
+  /* 3-Column Table */
+  timetableSheet: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
-  dayHeaderRow: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#e0f2fe',
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    marginBottom: 10,
+  sheetHeader: {
+    marginBottom: 16,
   },
-  dayHeaderText: {
+  sheetDayTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+
+  tableContainer: {},
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  tableHeaderText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#374151',
+    flex: 1,
+    textAlign: 'center',
+  },
+
+  tableRow: {
+    flexDirection: 'row',
+    backgroundColor: '#f8fafc',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 6,
+  },
+  periodCell: {
+    flex: 0.8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  periodNumber: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#1d4ed8',
+    color: '#3b82f6',
+    backgroundColor: '#dbeafe',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-
-  periodCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
-    backgroundColor: '#f9fafb',
+  timeCell: {
+    flex: 1.5,
+    justifyContent: 'center',
   },
-  periodLeft: {
-    flex: 1,
-  },
-  periodLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#4b5563',
-  },
-  periodTime: {
+  timeText: {
     fontSize: 12,
-    color: '#9ca3af',
-    marginTop: 2,
+    color: '#64748b',
+    fontWeight: '500',
+    textAlign: 'center',
   },
-  subjectPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: '#e0f7fa',
+  subjectCell: {
+    flex: 2.2,
+    justifyContent: 'center',
   },
   subjectText: {
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1f2937',
+    marginBottom: 2,
+  },
+  teacherText: {
+    fontSize: 11,
+    color: '#6b7280',
+  },
+
+  /* Empty Schedule */
+  emptySchedule: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  emptyScheduleText: {
+    fontSize: 14,
+    color: '#9ca3af',
+  },
+
+  /* Subjects */
+  subjectsSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  sectionHeader: {
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  subjectsHorizontalScroll: {},
+  compactSubjectCard: {
+    width: 72,
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  compactSubjectColor: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  compactSubjectInitial: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  compactSubjectName: {
+    fontSize: 12,
     fontWeight: '600',
-    color: '#006064',
+    color: '#1f2937',
+    textAlign: 'center',
+  },
+
+  noSubjects: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  noSubjectsText: {
+    fontSize: 14,
+    color: '#9ca3af',
   },
 
   centered: {

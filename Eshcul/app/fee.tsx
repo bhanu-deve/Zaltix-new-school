@@ -214,14 +214,15 @@ interface FeeRecord {
   id: string;
   label: string;
   amount: number;
+  paidAmount: number;
   dueDate: string;
-  status: 'Paid' | 'Unpaid';
+  status: 'Paid' | 'Unpaid' | 'Partial';
 }
 
 const termWiseData: FeeRecord[] = [
-  { id: '1', label: 'Term 1', amount: 15000, dueDate: '2025-06-01', status: 'Paid' },
-  { id: '2', label: 'Term 2', amount: 15000, dueDate: '2025-09-01', status: 'Unpaid' },
-  { id: '3', label: 'Term 3', amount: 15000, dueDate: '2025-12-01', status: 'Unpaid' },
+  { id: '1', label: 'Term 1', amount: 15000, paidAmount: 15000, dueDate: '2025-06-01', status: 'Paid' },
+  { id: '2', label: 'Term 2', amount: 15000, paidAmount: 5000, dueDate: '2025-09-01', status: 'Partial' },
+  { id: '3', label: 'Term 3', amount: 15000, paidAmount: 0, dueDate: '2025-12-01', status: 'Unpaid' },
 ];
 
 const FeeScreen = () => {
@@ -239,10 +240,11 @@ const FeeScreen = () => {
         <h1>Invoice - ${item.label}</h1>
         <table>
           <tr><th>Term</th><td>${item.label}</td></tr>
-          <tr><th>Amount</th><td>₹${item.amount}</td></tr>
+          <tr><th>Total Amount</th><td>₹${item.amount}</td></tr>
+          <tr><th>Paid Amount</th><td>₹${item.paidAmount}</td></tr>
+          <tr><th>Remaining</th><td>₹${item.amount - item.paidAmount}</td></tr>
           <tr><th>Due Date</th><td>${item.dueDate}</td></tr>
           <tr><th>Status</th><td>${item.status}</td></tr>
-          <tr><th>Remaining</th><td>₹${item.status === 'Paid' ? 0 : item.amount}</td></tr>
         </table>
       </body>
     </html>
@@ -253,11 +255,7 @@ const FeeScreen = () => {
       const html = generateInvoiceHTML(item);
       const { uri } = await Print.printToFileAsync({ html });
 
-      const newPath = `${FileSystem.documentDirectory}Invoice_${item.label.replace(
-        ' ',
-        '_'
-      )}.pdf`;
-
+      const newPath = `${FileSystem.documentDirectory}Invoice_${item.label.replace(' ', '_')}.pdf`;
       await FileSystem.moveAsync({ from: uri, to: newPath });
 
       if (await Sharing.isAvailableAsync()) {
@@ -280,10 +278,15 @@ const FeeScreen = () => {
   };
 
   const renderCard = ({ item }: { item: FeeRecord }) => {
-    const remainingAmount = item.status === 'Paid' ? 0 : item.amount;
+    const remainingAmount = item.amount - item.paidAmount;
+    const isPaid = remainingAmount === 0;
+    const isPartial = item.paidAmount > 0 && remainingAmount > 0;
 
     return (
-      <Card style={[styles.card, item.status === 'Paid' ? styles.paidCard : styles.unpaidCard]}>
+      <Card style={[
+        styles.card, 
+        isPaid ? styles.paidCard : isPartial ? styles.partialCard : styles.unpaidCard
+      ]}>
         <Card.Content style={styles.cardContent}>
           <View style={styles.headerRow}>
             <View style={styles.titleContainer}>
@@ -295,7 +298,10 @@ const FeeScreen = () => {
                 <Text style={styles.dueDateText}>Due: {item.dueDate}</Text>
               </View>
             </View>
-            <View style={[styles.statusBadge, item.status === 'Paid' ? styles.paidBadge : styles.unpaidBadge]}>
+            <View style={[
+              styles.statusBadge, 
+              isPaid ? styles.paidBadge : isPartial ? styles.partialBadge : styles.unpaidBadge
+            ]}>
               <Text style={styles.badgeText}>{item.status}</Text>
             </View>
           </View>
@@ -305,9 +311,21 @@ const FeeScreen = () => {
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
               <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>💰 Amount:</Text>
+                <Text style={styles.detailLabel}>💰 Total Amount:</Text>
               </View>
               <Text style={styles.detailValue}>₹{item.amount.toLocaleString()}</Text>
+            </View>
+            
+            <View style={styles.detailRow}>
+              <View style={styles.detailLabelContainer}>
+                <Text style={styles.detailLabel}>✅ Paid Amount:</Text>
+              </View>
+              <Text style={[
+                styles.detailValue,
+                item.paidAmount > 0 ? styles.paidAmountText : styles.unpaidAmountText
+              ]}>
+                ₹{item.paidAmount.toLocaleString()}
+              </Text>
             </View>
             
             <View style={styles.detailRow}>
@@ -333,7 +351,7 @@ const FeeScreen = () => {
           >
             📄 Invoice
           </Button>
-          {item.status === 'Unpaid' && (
+          {!isPaid && (
             <Button
               mode="contained"
               style={styles.payButton}
@@ -348,15 +366,23 @@ const FeeScreen = () => {
     );
   };
 
+  const totalFees = termWiseData.reduce((sum, item) => sum + item.amount, 0);
+  const totalPaid = termWiseData.reduce((sum, item) => sum + item.paidAmount, 0);
+  const termsPaid = termWiseData.filter(item => item.status === 'Paid').length;
+
   return (
     <View style={styles.container}>
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>₹{termWiseData.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}</Text>
+          <Text style={styles.statValue}>₹{totalFees.toLocaleString()}</Text>
           <Text style={styles.statLabel}>Total Fees</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{termWiseData.filter(item => item.status === 'Paid').length}/{termWiseData.length}</Text>
+          <Text style={styles.statValue}>₹{totalPaid.toLocaleString()}</Text>
+          <Text style={styles.statLabel}>Paid Amount</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{termsPaid}/{termWiseData.length}</Text>
           <Text style={styles.statLabel}>Terms Paid</Text>
         </View>
       </View>
@@ -367,6 +393,7 @@ const FeeScreen = () => {
         renderItem={renderCard}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        numColumns={1}
       />
       <Toast />
     </View>
@@ -386,6 +413,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+    flexWrap: 'wrap',
   },
   statCard: {
     backgroundColor: '#ffffff',
@@ -403,6 +431,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 1,
     borderColor: '#f1f5f9',
+    marginBottom: 8,
   },
   statValue: {
     fontSize: 18,
@@ -439,6 +468,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
     borderLeftWidth: 4,
     borderLeftColor: '#10b981',
+  },
+  partialCard: {
+    backgroundColor: '#fef3c7',
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
   },
   unpaidCard: {
     backgroundColor: '#fef2f2',
@@ -491,6 +525,9 @@ const styles = StyleSheet.create({
   paidBadge: {
     backgroundColor: '#10b981',
   },
+  partialBadge: {
+    backgroundColor: '#f59e0b',
+  },
   unpaidBadge: {
     backgroundColor: '#ef4444',
   },
@@ -528,6 +565,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1e293b',
     fontWeight: '700',
+  },
+  paidAmountText: {
+    color: '#10b981',
+  },
+  unpaidAmountText: {
+    color: '#64748b',
   },
   remainingAmount: {
     fontSize: 16,
