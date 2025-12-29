@@ -53,10 +53,12 @@ const Notifications = () => {
         await api.put(`/AddNotification/${editingId}`, formData);
         toast.success('Notification updated successfully!');
       } else {
-        await api.post(`/AddNotification`, {
-          ...formData,
-          status: 'Sent',
-        });
+          await api.post(`/AddNotification`, {
+            title: formData.title,
+            message: formData.message,
+            audience: formData.audience,
+          });
+
         toast.success('Notification sent successfully!');
       }
 
@@ -75,7 +77,7 @@ const Notifications = () => {
       title: notification.title,
       message: notification.message,
       audience: notification.audience,
-      deliveryMethod: notification.deliveryMethod,
+      deliveryMethod: 'App', // maake it static
     });
     setEditingId(notification._id);
     setShowAddForm(true);
@@ -148,11 +150,13 @@ const Notifications = () => {
                       onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
                       required
                     >
-                      <option value="">Select audience</option>
-                      <option value="All Classes">All Classes</option>
-                      <option value="Class 10A">Class 10A</option>
-                      <option value="Class 10B">Class 10B</option>
-                      <option value="Parents Only">Parents Only</option>
+                        <option value="">Select audience</option>
+                        <option value="ALL">All Classes</option>
+                        <option value="10-A">Class 10 - A</option>
+                        <option value="10-B">Class 10 - B</option>
+                        <option value="9-A">Class 9 - A</option>
+                        <option value="9-B">Class 9 - B</option>
+
                     </select>
                   </div>
                 </div>
@@ -169,7 +173,7 @@ const Notifications = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Delivery Method</label>
+                  {/* <label className="block text-sm font-medium mb-2">Delivery Method</label>
                   <select
                     className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-violet-500"
                     value={formData.deliveryMethod}
@@ -181,7 +185,7 @@ const Notifications = () => {
                     <option value="App + SMS">App + SMS</option>
                     <option value="App + Email">App + Email</option>
                     <option value="All">All Methods</option>
-                  </select>
+                  </select> */}
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
@@ -222,7 +226,7 @@ const Notifications = () => {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Audience</TableHead>
-                    <TableHead>Delivery Method</TableHead>
+                    {/* <TableHead>Delivery Method</TableHead> */}
                     <TableHead>Status</TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
@@ -233,7 +237,7 @@ const Notifications = () => {
                       <TableRow key={notification._id}>
                         <TableCell className="font-medium">{notification.title}</TableCell>
                         <TableCell>{notification.audience}</TableCell>
-                        <TableCell>{notification.deliveryMethod}</TableCell>
+                        {/* <TableCell>{notification.deliveryMethod}</TableCell> */}
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded text-xs ${

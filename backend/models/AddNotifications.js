@@ -14,14 +14,15 @@ const notificationSchema = new mongoose.Schema(
     audience: {
       type: String,
       required: true,
+      index: true,
     },
-    sentDate: {
-      type: Date,
-      default: Date.now,
-    },
+    // sentDate: {
+    //   type: Date,
+    //   default: Date.now,
+    // },
     status: {
       type: String,
-      enum: ['Sent', 'Failed', 'Pending'],
+      enum: ['Sent', 'Failed'],
       default: 'Sent',
     },
     recipients: {

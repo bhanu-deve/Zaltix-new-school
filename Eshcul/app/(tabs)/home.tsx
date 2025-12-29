@@ -224,6 +224,8 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/v
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '@/api/api';
+import { socket } from "@/api/socket";
 
 const cardData = [
   { name: 'Attendance', icon: (c: string) => <Ionicons name="calendar" size={28} color={c} />, bgColor: '#e3f4ff' },
@@ -246,15 +248,95 @@ const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
 const cardSize = (screenWidth - 40 - numColumns * 16) / numColumns;
 
+
 export default function HomeScreen() {
   const router = useRouter();
+
   const [student, setStudent] = useState<any>(null);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [latestNotification, setLatestNotification] = useState<any>(null);
+    // 🔹 LOAD STUDENT FROM ASYNC STORAGE
+  useEffect(() => {
+    const loadStudent = async () => {
+      try {
+        const s = await AsyncStorage.getItem('student');
+        if (s) {
+          setStudent(JSON.parse(s));
+        }
+      } catch (e) {
+        console.log('Error loading student', e);
+      }
+    };
+
+    loadStudent();
+  }, []);
+
+
+  // ✅ ADD THIS LINE HERE
+  const [lastSeenTime, setLastSeenTime] = useState<number>(0);
+
+
 
   useEffect(() => {
-    (async () => {
-      const s = await AsyncStorage.getItem('student');
-      if (s) setStudent(JSON.parse(s));
-    })();
+    socket.on("new-notification", (notification) => {
+      setLatestNotification(notification);
+      setNotificationCount((c) => c + 1);
+    });
+
+    return () => {
+      socket.off("new-notification");
+    };
+  }, []);
+
+  /* LOAD NOTIFICATIONS (CLASS-WISE) */
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const s = await AsyncStorage.getItem('student');
+        if (!s) return;
+
+        const studentData = JSON.parse(s);
+        const studentClass = `${studentData.grade}-${studentData.section}`;
+
+
+        const res = await api.get('/AddNotification');
+        const data = Array.isArray(res.data) ? res.data : [];
+
+        const filtered = data.filter(
+          n => n.audience === 'ALL' || n.audience === studentClass
+        );
+
+
+        if (filtered.length === 0) {
+          setNotificationCount(0);
+          setLatestNotification(null);
+          return;
+        }
+
+        // 🔑 SORT LATEST FIRST
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        );
+
+        const latestTime = new Date(filtered[0].createdAt).getTime();
+        const storedLastSeen = await AsyncStorage.getItem('lastSeenNotificationTime');
+
+        if (!storedLastSeen || latestTime > Number(storedLastSeen)) {
+          // ✅ NEW NOTIFICATION ARRIVED
+          setNotificationCount(filtered.length);
+          setLatestNotification(filtered[0]);
+          await AsyncStorage.setItem('notificationsRead', 'false');
+        } else {
+          // ✅ NO NEW NOTIFICATION
+          setNotificationCount(0);
+        }
+      } catch (e) {}
+    };
+
+
+    loadNotifications();
   }, []);
 
   const handleCardPress = (name: string) => {
@@ -277,9 +359,18 @@ export default function HomeScreen() {
     if (routes[name]) router.push(routes[name]);
   };
 
-  const handleNotificationPress = () => {
+  const handleNotificationPress = async () => {
+    if (latestNotification?.createdAt) {
+      await AsyncStorage.setItem(
+        'lastSeenNotificationTime',
+        new Date(latestNotification.createdAt).getTime().toString()
+      );
+    }
+
+    setNotificationCount(0); // ✅ hide badge immediately
     router.push('/notifications');
   };
+
 
   return (
     <LinearGradient colors={['#f4fbff', '#fdfefe']} style={styles.gradientContainer}>
@@ -333,6 +424,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Notification card */}
+        {/* Notification card – UI SAME, DATA DYNAMIC */}
         <TouchableOpacity
           style={styles.notificationCard}
           activeOpacity={0.9}
@@ -340,16 +432,48 @@ export default function HomeScreen() {
         >
           <View style={styles.notificationLeft}>
             <Text style={styles.notificationTitle}>Notifications</Text>
-            <Text style={styles.notificationSubtitle}>Exam results and updates are now available</Text>
-            <Text style={styles.notificationDate}>22nd April, 2020</Text>
+
+            <Text style={styles.notificationSubtitle}>
+              {latestNotification?.message || 'No new notifications'}
+            </Text>
+
+            <Text style={styles.notificationDate}>
+              {latestNotification
+                ? new Date(latestNotification.createdAt).toLocaleDateString()
+                : ''}
+            </Text>
           </View>
+
           <View style={styles.notificationRight}>
-            <View style={styles.notificationIconWrapper}>
-              <Ionicons name="notifications-outline" size={26} color="#1e88e5" />
-            </View>
-            <View style={styles.newBadge}>
-              <Text style={styles.newBadgeText}>NEW</Text>
-            </View>
+              <View style={styles.notificationIconWrapper}>
+                <View style={{ position: 'relative' }}>
+                  <Ionicons name="notifications-outline" size={26} color="#1e88e5" />
+
+                  {notificationCount > 0 && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: -6,
+                        right: -6,
+                        backgroundColor: 'red',
+                        borderRadius: 10,
+                        minWidth: 18,
+                        height: 18,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingHorizontal: 4,
+                      }}
+                    >
+                      <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
+                        {notificationCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+
+
           </View>
         </TouchableOpacity>
 

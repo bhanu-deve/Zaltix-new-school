@@ -50,10 +50,16 @@ export default function LoginPage() {
       console.log("LOGIN API RESPONSE:", res.data);
 
 
+      const student = res.data.student;
 
-      // Save JWT & student profile
+      // ✅ build className correctly
+      const className = `${student.grade}${student.section}`;
+
       await AsyncStorage.setItem("token", res.data.token);
-      await AsyncStorage.setItem("student", JSON.stringify(res.data.student));
+      await AsyncStorage.setItem("student", JSON.stringify(student));
+      await AsyncStorage.setItem("className", className); // ✅ FIXED
+      await AsyncStorage.setItem("section", student.section);
+
 
       Toast.show({
         type: "success",

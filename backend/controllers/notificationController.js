@@ -1,17 +1,29 @@
 import Notification from '../models/AddNotifications.js';
 
-// CREATE notification
+/* 🔴 CHANGE 1: IMPORT io */
+import { io } from '../index.js';
+
+// ================= CREATE notification =================
 export const createNotification = async (req, res) => {
   try {
     const notification = new Notification(req.body);
     await notification.save();
+
+    /* 🔴 CHANGE 2: EMIT REAL-TIME SOCKET EVENT */
+    if (notification.audience === 'All Classes' || notification.audience === 'ALL') {
+      io.emit('new-notification', notification); // send to everyone
+    } else {
+      io.to(notification.audience).emit('new-notification', notification);
+      // example audience: "10-A"
+    }
+
     res.status(201).json(notification);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-// GET all notifications
+// ================= GET all notifications =================
 export const getAllNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find()
@@ -23,7 +35,7 @@ export const getAllNotifications = async (req, res) => {
   }
 };
 
-// GET notification by ID
+// ================= GET notification by ID =================
 export const getNotificationById = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id).exec();
@@ -36,7 +48,7 @@ export const getNotificationById = async (req, res) => {
   }
 };
 
-// UPDATE notification
+// ================= UPDATE notification =================
 export const updateNotification = async (req, res) => {
   try {
     const updatedNotification = await Notification.findByIdAndUpdate(
@@ -55,7 +67,7 @@ export const updateNotification = async (req, res) => {
   }
 };
 
-// DELETE notification
+// ================= DELETE notification =================
 export const deleteNotification = async (req, res) => {
   try {
     const deleted = await Notification.findByIdAndDelete(req.params.id).exec();
