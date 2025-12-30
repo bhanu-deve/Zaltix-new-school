@@ -202,6 +202,7 @@ import { MaterialCommunityIcons, FontAwesome5, Entypo, Ionicons } from '@expo/ve
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '@/api/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function DiaryScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -219,11 +220,28 @@ export default function DiaryScreen() {
     Computer: <Entypo name="laptop" size={16} color="#2563eb" />,
     Default: <FontAwesome5 name="book" size={16} color="#2563eb" />,
   };
+  const [student, setStudent] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const s = await AsyncStorage.getItem('student');
+      if (s) setStudent(JSON.parse(s));
+    })();
+  }, []);
 
   const fetchDiary = async (dateStr: string) => {
+    if (!student) return;
+
     setLoading(true);
     try {
-      const res = await api.get('/AddDiary', { params: { date: dateStr } });
+      const res = await api.get('/AddDiary', {
+        params: {
+          date: dateStr,
+          class: student.grade,
+          section: student.section,
+        },
+      });
+
       setDiaryData(res.data || []);
     } catch (err) {
       console.error('Fetch diary error:', err);
@@ -234,8 +252,11 @@ export default function DiaryScreen() {
   };
 
   useEffect(() => {
-    fetchDiary(formattedDate);
-  }, [formattedDate]);
+    if (student) {
+      fetchDiary(formattedDate);
+    }
+  }, [formattedDate, student]);
+
 
   const handleDateChange = (_: any, date?: Date) => {
     if (Platform.OS !== 'ios') setShowPicker(false);
@@ -258,9 +279,10 @@ export default function DiaryScreen() {
               <Text style={styles.subjectChipText}>{item.subject}</Text>
             </View>
 
-            <View style={styles.classChip}>
-              <Text style={styles.classChipText}>Class {item.class}</Text>
-            </View>
+            <Text style={styles.classChipText}>
+              Class {item.class}-{item.section}
+            </Text>
+
           </View>
 
           {/* notes */}
@@ -291,9 +313,12 @@ export default function DiaryScreen() {
             style={styles.profileImage}
           />
           <View style={styles.profileTextContainer}>
-            <Text style={styles.profileName}>John Doe</Text>
-            <Text style={styles.profileInfo}>Class 10 • Section A</Text>
-            <Text style={styles.profileInfo}>Roll No: 23</Text>
+            <Text style={styles.profileName}>{student?.name}</Text>
+            <Text style={styles.profileInfo}>
+              Class {student?.grade} • Section {student?.section}
+            </Text>
+            <Text style={styles.profileInfo}>Roll No: {student?.rollNumber}</Text>
+
           </View>
         </LinearGradient>
 

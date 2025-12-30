@@ -57,6 +57,9 @@ export default function LoginPage() {
 
       await AsyncStorage.setItem("token", res.data.token);
       await AsyncStorage.setItem("student", JSON.stringify(student));
+
+      await AsyncStorage.setItem("rollNo", student.rollNumber.toString());
+
       await AsyncStorage.setItem("className", className); // ✅ FIXED
       await AsyncStorage.setItem("section", student.section);
 

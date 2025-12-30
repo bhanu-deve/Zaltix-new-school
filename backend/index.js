@@ -27,6 +27,8 @@ import AuthRoute from "./routes/authRoute.js";
 import AddStudent from "./routes/AddStudentRoute.js";
 import studentAuthRoute from "./routes/studentAuthRoute.js";
 
+import ReportSubjectRoute from "./routes/ReportSubjectRoute.js";
+
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -66,6 +68,9 @@ app.use(express.json());
 app.use("/api/auth", AuthRoute);
 
 app.use("/student-auth", studentAuthRoute);
+
+
+app.use("/report-subjects", ReportSubjectRoute);
 
 
 

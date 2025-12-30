@@ -346,6 +346,12 @@
 // };
 
 // export default Reports;
+
+
+
+
+
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -385,15 +391,17 @@ const Reports = () => {
     if (avg >= 35) return 'E';
     return 'F';
   };
-
   const fetchSubjects = async (className, examType) => {
     try {
-      const res = await api.get(`/subjects/${className}/${examType}`);
+      const res = await api.get(
+        `/report-subjects/${className}/${examType}`
+      );
       setSubjects(res.data.subjects || []);
-    } catch (err) {
+    } catch {
       setSubjects([]);
     }
   };
+
 
   const fetchStudents = async (className, examType) => {
     try {
@@ -427,7 +435,7 @@ const Reports = () => {
       const grade = calculateGrade(marks);
 
       await api.put(`/grades/${editingStudent._id}`, {
-        ...editMarks,
+        marks: editMarks,
         totalMarks,
         average,
         grade,
@@ -444,44 +452,44 @@ const Reports = () => {
 
   const handleAddStudent = async () => {
     const { name, rollNo } = newStudent;
+
     if (!name || !rollNo) {
-      toast.warn('Please enter name and roll number');
-      return;
-    }
-    if (subjects.length === 0) {
-      toast.warn('⚠️ Please set subjects first');
-      setShowSubjectsModal(true);
+      toast.warn("Please enter name and roll number");
       return;
     }
 
+    // 🔥 CREATE DYNAMIC MARKS OBJECT
     const marksObj = {};
     subjects.forEach(subject => {
       marksObj[subject] = Number(newStudent[subject]) || 0;
     });
-    const marks = subjects.map(subject => marksObj[subject]);
-    const totalMarks = marks.reduce((a, b) => a + b, 0);
-    const average = Math.round(totalMarks / marks.length);
-    const grade = calculateGrade(marks);
+
+    const marksArray = Object.values(marksObj);
+    const totalMarks = marksArray.reduce((a, b) => a + b, 0);
+    const average = Math.round(totalMarks / marksArray.length);
+    const grade = calculateGrade(marksArray);
 
     try {
-      await api.post(`/grades`, {
+      await api.post("/grades", {
         name,
         rollNo,
-        ...marksObj,
+        class: selectedClass,
+        examType: selectedExamType,   // ✅ VERY IMPORTANT
+        marks: marksObj,              // ✅ DYNAMIC SUBJECTS
         totalMarks,
         average,
         grade,
-        class: selectedClass,
-        examType: selectedExamType,
       });
+
       setShowAddModal(false);
-      setNewStudent({ name: '', rollNo: '' });
-      toast.success('✅ Student added successfully');
+      setNewStudent({ name: "", rollNo: "" });
+      toast.success("✅ Student added successfully");
       fetchStudents(selectedClass, selectedExamType);
     } catch (err) {
-      toast.error('❌ Failed to add student');
+      toast.error("❌ Failed to add student");
     }
   };
+
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this student record?')) return;
@@ -530,26 +538,29 @@ const Reports = () => {
 
   const saveSubjects = async () => {
     const inputSubjects = newSubjects
-      .map(subject => subject.trim().toLowerCase().replace(/\s+/g, '_'))
-      .filter(subject => subject.length > 0);
-    
+      .map(s => s.trim().toLowerCase().replace(/\s+/g, "_"))
+      .filter(s => s.length > 0);
+
     if (inputSubjects.length === 0) {
-      toast.warn('Please enter at least one subject');
+      toast.warn("Please enter at least one subject");
       return;
     }
 
     try {
-      await api.post(`/subjects/${selectedClass}/${selectedExamType}`, {
-        subjects: inputSubjects
-      });
+      await api.post(
+        `/report-subjects/${selectedClass}/${selectedExamType}`,
+        { subjects: inputSubjects }
+      );
+
       setSubjects(inputSubjects);
       setShowSubjectsModal(false);
-      setNewSubjects(['']);
-      toast.success(`✅ Set ${inputSubjects.length} subjects`);
-    } catch (err) {
-      toast.error('❌ Failed to save subjects');
+      setNewSubjects([""]);
+      toast.success("✅ Report subjects saved");
+    } catch {
+      toast.error("❌ Failed to save report subjects");
     }
   };
+
 
   const formatSubjectName = (subject) => {
     return subject.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
@@ -685,10 +696,11 @@ const Reports = () => {
                             </span>
                           </TableCell>
                           {subjects.map((subject) => (
-                            <TableCell key={subject} className="text-center font-mono text-sm">
-                              {student[subject] || 0}
+                            <TableCell key={subject} className="text-center">
+                              {student.marks?.[subject] || 0}
                             </TableCell>
                           ))}
+
                           <TableCell className="text-center font-bold text-green-600">{totalMarks}</TableCell>
                           <TableCell className="text-center font-bold">{average}%</TableCell>
                           <TableCell className="text-center">
