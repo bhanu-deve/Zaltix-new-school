@@ -13,11 +13,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import api from "../api/api";
 import { socket } from "@/api/socket";
+import { useLang } from './language';
 
 
 const { width } = Dimensions.get('window');
 
 export default function NotificationsScreen() {
+  const { t } = useLang();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +46,8 @@ export default function NotificationsScreen() {
 
       setNotifications(filtered);
     } catch (e) {
-      Alert.alert('Error', 'Failed to load notifications');
+      Alert.alert(t.error, t.failedToLoadNotifications);
+
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -104,7 +107,8 @@ export default function NotificationsScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <MaterialCommunityIcons name="bell-off" size={48} color="#94a3b8" />
-            <Text style={styles.emptyText}>No notifications</Text>
+            <Text style={styles.emptyText}>{t.noNotifications}</Text>
+
           </View>
         }
       />

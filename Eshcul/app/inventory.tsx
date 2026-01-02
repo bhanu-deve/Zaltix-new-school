@@ -133,8 +133,10 @@ import { Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import api from "../api/api";
+import { useLang } from './language';
 
 export default function InventoryScreen() {
+  const { t } = useLang();
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -191,7 +193,10 @@ export default function InventoryScreen() {
         </View>
         <View style={styles.itemInfo}>
           <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemQuantity}>Available: {item.quantity}</Text>
+          <Text style={styles.itemQuantity}>
+            {t.available}: {item.quantity}
+          </Text>
+
         </View>
       </View>
     </Card>
@@ -204,8 +209,10 @@ export default function InventoryScreen() {
           <Text style={styles.headerIconText}>📦</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Student Inventory</Text>
-          <Text style={styles.headerSubtitle}>{inventory.length} items in stock</Text>
+          <Text style={styles.headerTitle}>{t.inventorys}</Text>
+          <Text style={styles.headerSubtitle}>
+            {inventory.length} {t.itemsInStock}
+          </Text>
         </View>
       </View>
 
@@ -225,8 +232,9 @@ export default function InventoryScreen() {
               <View style={styles.emptyIcon}>
                 <MaterialCommunityIcons name="package-variant" size={50} color="#cbd5e1" />
               </View>
-              <Text style={styles.emptyTitle}>No inventory items</Text>
-              <Text style={styles.emptyText}>No items found in inventory</Text>
+              <Text style={styles.emptyTitle}>{t.noInventory}</Text>
+              <Text style={styles.emptyText}>{t.noInventoryDesc}</Text>
+
             </View>
           }
         />

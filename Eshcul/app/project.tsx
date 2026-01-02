@@ -417,8 +417,10 @@ import { MaterialCommunityIcons, FontAwesome5, Entypo } from '@expo/vector-icons
 import moment from 'moment';
 import api from "../api/api";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLang } from './language';
 
 export default function ProjectScreen() {
+  const { t } = useLang();
 
   /* ===================== 1️⃣ ADD THESE STATES (TOP) ===================== */
   const [projects, setProjects] = useState([]);
@@ -499,22 +501,22 @@ export default function ProjectScreen() {
 
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>
-            {student?.name || 'Student'}
+            {student?.name || t.student}
           </Text>
 
           <View style={styles.profileDetails}>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Class</Text>
+              <Text style={styles.detailLabel}>{t.class}</Text>
               <Text style={styles.detailValue}>{student?.grade || '-'}</Text>
             </View>
 
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Section</Text>
+              <Text style={styles.detailLabel}>{t.section}</Text>
               <Text style={styles.detailValue}>{student?.section || '-'}</Text>
             </View>
 
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Roll No</Text>
+              <Text style={styles.detailLabel}>{t.rollNo}</Text>
               <Text style={styles.detailValue}>{student?.rollNumber || '-'}</Text>
             </View>
           </View>
@@ -529,8 +531,9 @@ export default function ProjectScreen() {
       {/* ===================== 5️⃣ EMPTY STATE ===================== */}
       {!loading && projects.length === 0 && (
         <Text style={{ textAlign: 'center', marginTop: 40 }}>
-          📘 No projects assigned for your class
+          📘 {t.noProjects}
         </Text>
+
       )}
 
       {/* ===================== 6️⃣ PROJECT LIST ===================== */}
@@ -562,12 +565,12 @@ export default function ProjectScreen() {
 
                 <View style={styles.classBadge}>
                   <Text style={[styles.classText, { color }]}>
-                    Class {item.class} - {item.section}
+                    {t.class} {item.class} - {item.section}
                   </Text>
                 </View>
 
                 <View style={styles.descriptionBox}>
-                  <Text style={styles.descriptionLabel}>Description:</Text>
+                  <Text style={styles.descriptionLabel}>{t.description}:</Text>
                   <Text style={styles.descriptionText}>{item.description}</Text>
                 </View>
               </View>

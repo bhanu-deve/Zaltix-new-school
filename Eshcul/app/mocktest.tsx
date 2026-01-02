@@ -148,8 +148,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 // import axios from 'axios';
 // import {Api_url} from './config/config.js'
 import api from "../api/api";
+import { useLang } from './language';
 
 export default function MockTestsScreen() {
+  const { t } = useLang();
   const [mockTests, setMockTests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -214,8 +216,11 @@ export default function MockTestsScreen() {
           <Text style={styles.headerIconText}>📝</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Upcoming Mock Tests</Text>
-          <Text style={styles.headerSubtitle}>{mockTests.length} tests scheduled</Text>
+          <Text style={styles.headerTitle}>{t.upcomingMockTests}</Text>
+          <Text style={styles.headerSubtitle}>
+            {mockTests.length} {t.testsScheduled}
+          </Text>
+
         </View>
       </View>
 
@@ -237,7 +242,10 @@ export default function MockTestsScreen() {
                 </View>
                 
                 <View style={styles.details}>
-                  <Text style={styles.title}>{item.title || 'Untitled Test'}</Text>
+                  <Text style={styles.title}>
+                    {item.title || t.untitledTest}
+                  </Text>
+
                   
                   <View style={styles.infoRow}>
                     <View style={[styles.subjectBadge, { backgroundColor: subjectColor + '15' }]}>
@@ -246,18 +254,23 @@ export default function MockTestsScreen() {
                       </Text>
                     </View>
                     <View style={styles.classBadge}>
-                      <Text style={styles.classText}>Class {item.class || '-'}</Text>
+                      <Text style={styles.classText}>
+                        {t.class} {item.class || '-'}
+                      </Text>
+
                     </View>
                   </View>
                   
                   <View style={styles.detailsRow}>
                     <View style={styles.detailItem}>
-                      <Text style={styles.detailLabel}>Questions</Text>
+                      <Text style={styles.detailLabel}>{t.questions}</Text>
                       <Text style={styles.detailValue}>{item.questions || '-'}</Text>
                     </View>
                     <View style={styles.detailItem}>
-                      <Text style={styles.detailLabel}>Duration</Text>
-                      <Text style={styles.detailValue}>{item.duration ? `${item.duration} mins` : '-'}</Text>
+                      <Text style={styles.detailLabel}>{t.duration}</Text>
+                      <Text style={styles.detailValue}>
+                        {item.duration ? `${item.duration} ${t.minutes}` : '-'}
+                      </Text>
                     </View>
                   </View>
                   
@@ -279,8 +292,9 @@ export default function MockTestsScreen() {
             <View style={styles.emptyIcon}>
               <MaterialCommunityIcons name="clipboard-text-outline" size={50} color="#cbd5e1" />
             </View>
-            <Text style={styles.emptyTitle}>No mock tests available</Text>
-            <Text style={styles.emptyText}>No tests scheduled at the moment</Text>
+            <Text style={styles.emptyTitle}>{t.noMockTests}</Text>
+            <Text style={styles.emptyText}>{t.noMockTestsDesc}</Text>
+
           </View>
         }
       />

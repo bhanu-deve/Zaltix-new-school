@@ -149,7 +149,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/api";
-
+import { useLang } from "./language";
 /* ================= TYPES ================= */
 interface Message {
   id: string;
@@ -163,6 +163,7 @@ const chatbotIntents: Record<string, () => Promise<string>> = {};
 
 /* ================= COMPONENT ================= */
 export default function ChatBox() {
+  const { t } = useLang();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
 
@@ -175,7 +176,7 @@ export default function ChatBox() {
       setMessages([
         {
           id: "welcome",
-          text: `👋 Welcome to Zaltix School\nHi ${student?.name || "Student"}, ask any question`,
+          text: `👋 ${t.welcomeToSchool}${t.hi} ${student?.name || t.student}, ${t.askQuestion}`,
           type: "bot",
           time: getTime(),
         },
@@ -232,7 +233,8 @@ export default function ChatBox() {
         ? res.data
         : res.data?.data || res.data?.ebooks || [];
 
-      if (!ebooks.length) return "📘 No eBooks available.";
+      if (!ebooks.length) return `📘 ${t.noEbooks}`;
+
 
       return (
         "📘 eBooks:\n" +
@@ -396,7 +398,7 @@ export default function ChatBox() {
     setInputText("");
 
     const intent = detectIntent(inputText);
-    let reply = "❓ I can help with attendance and school information.";
+    let reply = t.chatbotHelp;
 
     if (chatbotIntents[intent]) {
       reply = await chatbotIntents[intent]();
@@ -450,8 +452,9 @@ export default function ChatBox() {
           <Text style={styles.headerIconText}>💬</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Zaltix Chatbot</Text>
-          <Text style={styles.headerSubtitle}>School Assistant</Text>
+          <Text style={styles.headerTitle}>{t.chatbot}</Text>
+          <Text style={styles.headerSubtitle}>{t.schoolAssistant}</Text>
+
         </View>
       </View>
 
@@ -467,7 +470,7 @@ export default function ChatBox() {
         <TextInput
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Type your message..."
+          placeholder={t.typeMessage}
           placeholderTextColor="#94a3b8"
           style={styles.textInput}
           multiline

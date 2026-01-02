@@ -15,9 +15,13 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import api from '@/api/api';
+import { useLang } from '../language';
+
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { lang, changeLanguage, t } = useLang();
+
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -45,8 +49,8 @@ export default function SettingsScreen() {
   const handleLogout = async () => {
     Toast.show({
       type: 'info',
-      text1: 'Logging out...',
-      text2: 'You will be redirected shortly.',
+      text1: t.loggingOut ?? 'Logging out...',
+      text2: t.redirecting ?? 'You will be redirected shortly.',
     });
 
     await AsyncStorage.multiRemove(['token', 'student']);
@@ -61,8 +65,8 @@ export default function SettingsScreen() {
     if (!oldPassword || !newPassword || !confirmPassword) {
       Toast.show({
         type: 'error',
-        text1: 'Missing Fields',
-        text2: 'Please fill all fields.',
+        text1: t.missingFields ?? 'Missing Fields',
+        text2: t.fillAll ?? 'Please fill all fields.',
       });
       return;
     }
@@ -70,8 +74,8 @@ export default function SettingsScreen() {
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: 'error',
-        text1: 'Password Mismatch',
-        text2: 'New passwords do not match.',
+        text1: t.passwordMismatch ?? 'Password Mismatch',
+        text2: t.passwordNotMatch ?? 'New passwords do not match.',
       });
       return;
     }
@@ -79,7 +83,7 @@ export default function SettingsScreen() {
     if (newPassword.length < 6) {
       Toast.show({
         type: 'error',
-        text1: 'Password must be at least 6 characters',
+        text1: t.passwordLength ?? 'Password must be at least 6 characters',
       });
       return;
     }
@@ -92,8 +96,8 @@ export default function SettingsScreen() {
 
       Toast.show({
         type: 'success',
-        text1: 'Password Updated',
-        text2: 'Your password was updated successfully.',
+        text1: t.passwordUpdated ?? 'Password Updated',
+        text2: t.passwordSuccess ?? 'Your password was updated successfully.',
       });
 
       setOldPassword('');
@@ -103,7 +107,7 @@ export default function SettingsScreen() {
     } catch (err: any) {
       Toast.show({
         type: 'error',
-        text1: err?.response?.data?.message || 'Password update failed',
+        text1: err?.response?.data?.message || t.passwordFailed || 'Password update failed',
       });
     }
   };
@@ -112,7 +116,7 @@ export default function SettingsScreen() {
   const handleHelpSupport = () => {
     Toast.show({
       type: 'info',
-      text1: 'Help & Support',
+      text1: t.helpSupport ?? 'Help & Support',
       text2: '📧 help@yourapp.com | 📞 +91 98765 43210',
       visibilityTime: 4000,
     });
@@ -121,7 +125,7 @@ export default function SettingsScreen() {
   const handleAppInfo = () => {
     Toast.show({
       type: 'info',
-      text1: 'App Info',
+      text1: t.appInfo ?? 'App Info',
       text2: '📱 SchoolEase v1.0.0\n🧑‍💻 Zaltix Soft Solutions',
       visibilityTime: 4000,
     });
@@ -134,60 +138,86 @@ export default function SettingsScreen() {
           <Ionicons name="person-circle" size={64} color="#008080" />
           <Text style={styles.profileName}>{student?.name}</Text>
           <Text style={styles.profileSubtext}>
-            Class: {student?.grade} - {student?.section} | Roll No: {student?.rollNumber}
+            {t.class}: {student?.grade} - {student?.section} | {t.rollNo}: {student?.rollNumber}
           </Text>
         </View>
 
         <View style={styles.settingGroup}>
           <SettingItem
             icon="key"
-            text="Change Password"
+            text={t.changePassword ?? 'Change Password'}
             onPress={() => setShowChangePassword(!showChangePassword)}
           />
 
           {showChangePassword && (
             <View style={styles.passwordForm}>
               <PasswordInput
-                placeholder="Old Password"
+                placeholder={t.oldPassword ?? 'Old Password'}
                 value={oldPassword}
                 onChange={setOldPassword}
                 visible={showOld}
                 toggle={() => setShowOld(!showOld)}
               />
               <PasswordInput
-                placeholder="New Password"
+                placeholder={t.newPassword ?? 'New Password'}
                 value={newPassword}
                 onChange={setNewPassword}
                 visible={showNew}
                 toggle={() => setShowNew(!showNew)}
               />
               <PasswordInput
-                placeholder="Confirm New Password"
+                placeholder={t.confirmPassword ?? 'Confirm New Password'}
                 value={confirmPassword}
                 onChange={setConfirmPassword}
                 visible={showConfirm}
                 toggle={() => setShowConfirm(!showConfirm)}
               />
               <TouchableOpacity style={styles.saveButton} onPress={handleChangePassword}>
-                <Text style={styles.saveText}>Update Password</Text>
+                {t.updatePassword ?? 'Update Password'}
               </TouchableOpacity>
             </View>
           )}
 
-          <SettingItem icon="notifications" text="Notifications">
+          <SettingItem icon="notifications" text={t.notifications ?? 'Notifications'}>
             <Switch
               value={notificationsEnabled}
               onValueChange={() => setNotificationsEnabled(!notificationsEnabled)}
             />
           </SettingItem>
 
-          <SettingItem icon="help-circle" text="Help & Support" onPress={handleHelpSupport} />
-          <SettingItem icon="information-circle" text="App Info" onPress={handleAppInfo} />
+          <SettingItem icon="help-circle" text={t.helpSupport ?? 'Help & Support'} onPress={handleHelpSupport} />
+          <SettingItem icon="information-circle" text={t.appInfo ?? 'App Info'} onPress={handleAppInfo} />
+          <SettingItem
+              icon="language"
+              text={t.language ?? 'Language'}
+              onPress={undefined}
+            >
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity onPress={() => changeLanguage('en')}>
+                  <Text style={{ marginRight: 10, color: lang === 'en' ? '#008080' : '#555' }}>
+                    EN
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => changeLanguage('hi')}>
+                  <Text style={{ marginRight: 10, color: lang === 'hi' ? '#008080' : '#555' }}>
+                    HI
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => changeLanguage('te')}>
+                  <Text style={{ color: lang === 'te' ? '#008080' : '#555' }}>
+                    TE
+                  </Text>
+                </TouchableOpacity>
+              </View>
+          </SettingItem>
+
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <MaterialIcons name="logout" size={20} color="#fff" />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t.logout ?? 'Logout'}</Text> 
         </TouchableOpacity>
       </ScrollView>
 

@@ -181,6 +181,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { useLang } from './language';
+
 
 // Conditionally import MapView only on native platforms
 let MapView: any = null;
@@ -207,6 +209,8 @@ if (Platform.OS !== 'web') {
 }
 
 export default function BusTrackingScreen() {
+  const { t } = useLang();
+
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -236,8 +240,9 @@ export default function BusTrackingScreen() {
           <Text style={styles.headerIconText}>🚌</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Bus Tracking</Text>
-          <Text style={styles.headerSubtitle}>Track your school bus in real-time</Text>
+          <Text style={styles.headerTitle}>{t.busTracking}</Text>
+          <Text style={styles.headerSubtitle}>{t.trackBusRealtime}</Text>
+
         </View>
       </View>
 
@@ -314,9 +319,9 @@ export default function BusTrackingScreen() {
 
       <View style={styles.busDetails}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>🚌 Bus Details</Text>
+          <Text style={styles.sectionTitle}>🚌 {t.busDetails}</Text>
           <View style={[styles.busStatus, { backgroundColor: '#10B981' + '20' }]}>
-            <Text style={[styles.busStatusText, { color: '#10B981' }]}>On Time</Text>
+            <Text style={[styles.busStatusText, { color: '#10B981' }]}>{t.onTime}</Text>
           </View>
         </View>
         
@@ -325,7 +330,7 @@ export default function BusTrackingScreen() {
             <View style={[styles.detailIcon, { backgroundColor: '#3B82F6' + '20' }]}>
               <Text style={[styles.detailIconText, { color: '#3B82F6' }]}>🚌</Text>
             </View>
-            <Text style={styles.detailLabel}>Bus No</Text>
+            <Text style={styles.detailLabel}>{t.busNo}</Text>
             <Text style={styles.detailValue}>TS 09 AB 1234</Text>
           </View>
           
@@ -333,7 +338,7 @@ export default function BusTrackingScreen() {
             <View style={[styles.detailIcon, { backgroundColor: '#F59E0B' + '20' }]}>
               <FontAwesome5 name="user-tie" size={16} color="#F59E0B" />
             </View>
-            <Text style={styles.detailLabel}>Driver</Text>
+            <Text style={styles.detailLabel}>{t.driver}</Text>
             <Text style={styles.detailValue}>Ramesh Kumar</Text>
           </View>
           
@@ -341,7 +346,7 @@ export default function BusTrackingScreen() {
             <View style={[styles.detailIcon, { backgroundColor: '#EF4444' + '20' }]}>
               <FontAwesome5 name="clock" size={16} color="#EF4444" />
             </View>
-            <Text style={styles.detailLabel}>ETA</Text>
+            <Text style={styles.detailLabel}>{t.eta}</Text>
             <Text style={styles.detailValue}>8:25 AM</Text>
           </View>
           
@@ -349,7 +354,7 @@ export default function BusTrackingScreen() {
             <View style={[styles.detailIcon, { backgroundColor: '#8B5CF6' + '20' }]}>
               <FontAwesome5 name="phone" size={16} color="#8B5CF6" />
             </View>
-            <Text style={styles.detailLabel}>Contact</Text>
+            <Text style={styles.detailLabel}>{t.contact}</Text>
             <Text style={styles.detailValue}>+91 98765 43210</Text>
           </View>
         </View>

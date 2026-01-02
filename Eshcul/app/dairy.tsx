@@ -203,8 +203,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '@/api/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLang } from './language';
 
 export default function DiaryScreen() {
+  const { t } = useLang();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [diaryData, setDiaryData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -280,13 +282,15 @@ export default function DiaryScreen() {
             </View>
 
             <Text style={styles.classChipText}>
-              Class {item.class}-{item.section}
+              {t.class} {item.class}-{item.section}
             </Text>
+
 
           </View>
 
           {/* notes */}
-          <Text style={styles.notesLabel}>Homework / Notes</Text>
+          <Text style={styles.notesLabel}>{t.homeworkNotes}</Text>
+
           <Text style={styles.notesText}>{item.notes}</Text>
         </View>
       </View>
@@ -315,9 +319,11 @@ export default function DiaryScreen() {
           <View style={styles.profileTextContainer}>
             <Text style={styles.profileName}>{student?.name}</Text>
             <Text style={styles.profileInfo}>
-              Class {student?.grade} • Section {student?.section}
+              {t.class} {student?.grade} • {t.section} {student?.section}
             </Text>
-            <Text style={styles.profileInfo}>Roll No: {student?.rollNumber}</Text>
+            <Text style={styles.profileInfo}>
+              {t.rollNo}: {student?.rollNumber}
+            </Text>
 
           </View>
         </LinearGradient>
@@ -325,8 +331,9 @@ export default function DiaryScreen() {
         {/* date row */}
         <View style={styles.dateRow}>
           <View style={styles.dateLabelBlock}>
-            <Text style={styles.dateLabel}>Diary date</Text>
-            <Text style={styles.dateHint}>Tap to choose another date</Text>
+            <Text style={styles.dateLabel}>{t.diaryDate}</Text>
+            <Text style={styles.dateHint}>{t.tapToChooseDate}</Text>
+
           </View>
           <TouchableOpacity
             style={styles.datePill}
@@ -358,7 +365,7 @@ export default function DiaryScreen() {
             showsVerticalScrollIndicator={false}
           />
         ) : (
-          <Text style={styles.noDataText}>No diary entries for this date.</Text>
+          <Text style={styles.noDataText}>{t.noDiary}</Text>
         )}
       </View>
     </LinearGradient>

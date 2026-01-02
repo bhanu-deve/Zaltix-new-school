@@ -209,6 +209,8 @@ import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import Toast from 'react-native-toast-message';
+import { useLang } from './language';
+
 
 interface FeeRecord {
   id: string;
@@ -226,6 +228,8 @@ const termWiseData: FeeRecord[] = [
 ];
 
 const FeeScreen = () => {
+  const { t } = useLang();
+
   const generateInvoiceHTML = (item: FeeRecord) => `
     <html>
       <head>
@@ -237,14 +241,14 @@ const FeeScreen = () => {
         </style>
       </head>
       <body>
-        <h1>Invoice - ${item.label}</h1>
+        <h1>${t.invoice} - ${item.label}</h1>
         <table>
           <tr><th>Term</th><td>${item.label}</td></tr>
-          <tr><th>Total Amount</th><td>₹${item.amount}</td></tr>
-          <tr><th>Paid Amount</th><td>₹${item.paidAmount}</td></tr>
-          <tr><th>Remaining</th><td>₹${item.amount - item.paidAmount}</td></tr>
-          <tr><th>Due Date</th><td>${item.dueDate}</td></tr>
-          <tr><th>Status</th><td>${item.status}</td></tr>
+          <tr><th>${t.totalAmount}</th><td>₹${item.amount}</td></tr>
+          <tr><th>${t.paidAmount}</th><td>₹${item.paidAmount}</td></tr>
+          <tr><th>${t.remaining}</th><td>₹${item.amount - item.paidAmount}</td></tr>
+          <tr><th>${t.dueDate}</th><td>${item.dueDate}</td></tr>
+          <tr><th>${t.status}</th><td>${item.status}</td></tr>
         </table>
       </body>
     </html>
@@ -265,14 +269,15 @@ const FeeScreen = () => {
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to generate or save invoice');
+      Alert.alert(t.error, t.invoiceFailed);
+
     }
   };
 
   const handlePayment = (item: FeeRecord) => {
     Toast.show({
       type: 'success',
-      text1: 'Payment Successful',
+      text1: t.paymentSuccessful,
       text2: `${item.label} fee has been paid 🎉`,
     });
   };
@@ -295,7 +300,7 @@ const FeeScreen = () => {
               </View>
               <View style={styles.titleTextContainer}>
                 <Text style={styles.title}>{item.label}</Text>
-                <Text style={styles.dueDateText}>Due: {item.dueDate}</Text>
+                <Text style={styles.dueDateText}>{t.due}: {item.dueDate}</Text>
               </View>
             </View>
             <View style={[
@@ -311,14 +316,14 @@ const FeeScreen = () => {
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
               <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>💰 Total Amount:</Text>
+                <Text style={styles.detailLabel}>💰 {t.totalAmount}:</Text>
               </View>
               <Text style={styles.detailValue}>₹{item.amount.toLocaleString()}</Text>
             </View>
             
             <View style={styles.detailRow}>
               <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>✅ Paid Amount:</Text>
+                <Text style={styles.detailLabel}>✅ {t.paidAmount}:</Text>
               </View>
               <Text style={[
                 styles.detailValue,
@@ -330,7 +335,7 @@ const FeeScreen = () => {
             
             <View style={styles.detailRow}>
               <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>⚖️ Remaining:</Text>
+                <Text style={styles.detailLabel}>⚖️ {t.remaining}:</Text>
               </View>
               <Text style={[
                 styles.remainingAmount,
@@ -349,7 +354,7 @@ const FeeScreen = () => {
             labelStyle={styles.invoiceButtonText}
             onPress={() => handleDownloadInvoice(item)}
           >
-            📄 Invoice
+            📄 {t.invoice}
           </Button>
           {!isPaid && (
             <Button
@@ -358,7 +363,7 @@ const FeeScreen = () => {
               labelStyle={styles.payButtonText}
               onPress={() => handlePayment(item)}
             >
-              💳 Pay Now
+              💳 {t.payNow}
             </Button>
           )}
         </Card.Actions>
@@ -375,15 +380,15 @@ const FeeScreen = () => {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>₹{totalFees.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>Total Fees</Text>
+          <Text style={styles.statLabel}>{t.totalFees}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>₹{totalPaid.toLocaleString()}</Text>
-          <Text style={styles.statLabel}>Paid Amount</Text>
+          <Text style={styles.statLabel}>{t.paidAmount}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{termsPaid}/{termWiseData.length}</Text>
-          <Text style={styles.statLabel}>Terms Paid</Text>
+          <Text style={styles.statLabel}>{t.termsPaid}</Text>
         </View>
       </View>
 
