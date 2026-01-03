@@ -25,6 +25,8 @@ export default function LoginPage() {
   const [admissionNumber, setAdmissionNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isOtpMode, setIsOtpMode] = useState(false);
+
   const router = useRouter();
     /* ✅ CLEAR OLD TOKEN ONCE (FIX INVALID TOKEN ISSUE) */
     useEffect(() => {
@@ -33,55 +35,53 @@ export default function LoginPage() {
 
   /* ===================== LOGIN HANDLER ===================== */
   const handleSignIn = async () => {
-    if (!admissionNumber || !password) {
+    if (!admissionNumber) {
+      Toast.show({ type: "error", text1: "Enter roll number" });
+      return;
+    }
+
+    if (!password) {
       Toast.show({
         type: "error",
-        text1: "Please enter all fields",
+        text1: isOtpMode ? "Enter OTP" : "Enter password",
       });
       return;
     }
 
+
     try {
-     const res = await api.post("/student-auth/login", {
-        rollNumber: admissionNumber,
-        password,
-      });
+      const url = isOtpMode
+        ? "/student-auth/otp-login"      // ✅ OTP login
+        : "/student-auth/login";         // ✅ Normal login
 
-      console.log("LOGIN API RESPONSE:", res.data);
+      const payload = isOtpMode
+        ? { rollNumber: admissionNumber, otp: password }
+        : { rollNumber: admissionNumber, password };
 
+      const res = await api.post(url, payload);
 
       const student = res.data.student;
-
-      // ✅ build className correctly
       const className = `${student.grade}${student.section}`;
 
       await AsyncStorage.setItem("token", res.data.token);
       await AsyncStorage.setItem("student", JSON.stringify(student));
-
       await AsyncStorage.setItem("rollNo", student.rollNumber.toString());
-
-      await AsyncStorage.setItem("className", className); // ✅ FIXED
+      await AsyncStorage.setItem("className", className);
       await AsyncStorage.setItem("section", student.section);
 
-
-      Toast.show({
-        type: "success",
-        text1: "Login Successful 🎉",
-      });
-
+      Toast.show({ type: "success", text1: "Login Successful 🎉" });
+      setIsOtpMode(false);
       router.replace("/(tabs)/home");
-    } catch (err: any) {
-        console.log("❌ LOGIN ERROR FULL:", err);
-        console.log("❌ LOGIN ERROR RESPONSE:", err?.response);
-        console.log("❌ LOGIN ERROR DATA:", err?.response?.data);
-        console.log("❌ LOGIN ERROR STATUS:", err?.response?.status);
 
-        Toast.show({
-          type: "error",
-          text1: err?.response?.data?.error || "Login failed",
-        });
-      }
+
+    } catch (err: any) {
+      Toast.show({
+        type: "error",
+        text1: err?.response?.data?.error || "Login failed",
+      });
+    }
   };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,15 +120,20 @@ export default function LoginPage() {
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>Password</Text>
+          <Text style={styles.label}>
+            {isOtpMode ? "OTP" : "Password"}
+          </Text>
+
           <View style={styles.passwordWrapper}>
             <TextInput
               style={styles.passwordInput}
-              placeholder="Enter Password"
+              placeholder={isOtpMode ? "Enter OTP" : "Enter Password"}
+
               placeholderTextColor="#aaa"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry={!showPassword}
+              secureTextEntry={!showPassword && !isOtpMode}
+
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
@@ -140,18 +145,13 @@ export default function LoginPage() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={() =>
-              Toast.show({
-                type: 'info',
-                text1: 'Password reset',
-                text2: 'Please contact your school admin',
-                position: 'bottom',
-              })
-            }
-          >
+          <TouchableOpacity onPress={() => router.push("/forgot-password" as any)}>
+
             <Text style={styles.forgot}>Forgot Password?</Text>
           </TouchableOpacity>
+
+
+
 
           <TouchableOpacity style={styles.button} onPress={handleSignIn}>
             <Text style={styles.buttonText}>Sign In</Text>

@@ -13,7 +13,9 @@ const studentRegistrationSchema = new mongoose.Schema(
     parentName: { type: String, required: true },
     parentPhone: { type: String, required: true },
     parentEmail: String,
-    address: String
+    address: String,
+    resetOtp: String,
+    resetOtpExpiry: Date
   },
   { timestamps: true }
 );
