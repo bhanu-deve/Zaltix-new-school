@@ -13,13 +13,12 @@
     },
     "android": {
       "adaptiveIcon": {
-    "foregroundImage": "./assets/images/adaptive-icon.png",
-    "backgroundColor": "#ffffff"
-  },
-  "edgeToEdgeEnabled": true,
-  "package": "com.anjalidev_123.Eshcul"
-},
-
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.anjalidev_123.Eshcul"
+    },
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -43,7 +42,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "c4d9412a-2f22-41d5-9910-472b95d492d2"
+        "projectId": "e6930fe1-b141-43a7-8d51-815e390549cc"
       }
     }
   }
