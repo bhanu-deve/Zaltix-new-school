@@ -33,6 +33,13 @@ import ReportSubjectRoute from "./routes/ReportSubjectRoute.js";
 
 import http from 'http';
 import { Server } from 'socket.io';
+import BusLocation from "./models/BusLocation.js";
+
+import DriverAuthRoute from "./routes/driverAuthRoute.js";
+
+
+
+
 
 
 
@@ -50,19 +57,41 @@ export const io = new Server(server, {
   transports: ["websocket"]
 });
 
-/*SOCKET ROOMS (CLASS + SECTION) */
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
+  /* ===== NOTIFICATIONS (EXISTING) ===== */
   socket.on("join-class", (classSection) => {
-    console.log("Joined class:", classSection);
-    socket.join(classSection); // example: "10-A"
+    socket.join(classSection);
+  });
+
+  /* ===== BUS TRACKING (NEW) ===== */
+  socket.on("join-bus", (busId) => {
+    socket.join(`bus-${busId}`);
+  });
+
+  socket.on("bus-location", async ({ busId, latitude, longitude }) => {
+    if (!busId || !latitude || !longitude) return;
+
+    await BusLocation.findOneAndUpdate(
+      { busId },
+      { latitude, longitude, updatedAt: new Date() },
+      { upsert: true }
+    );
+
+    io.to(`bus-${busId}`).emit("bus-location", {
+      busId,
+      latitude,
+      longitude,
+      updatedAt: new Date(),
+    });
   });
 
   socket.on("disconnect", () => {
     console.log("Socket disconnected:", socket.id);
   });
 });
+
 
 app.use(cors());
 app.use(express.json());
@@ -102,6 +131,10 @@ app.use('/addstudentbus', AddStudentBus);
 app.use('/studentfeedback', StudentFeedback);
 app.use("/students", AddStudent);
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/driver", DriverAuthRoute);
+
+
 
 /* ===== DB ERROR HANDLER ===== */
 Db.on('error', (err) => console.error('MongoDB error:', err));
