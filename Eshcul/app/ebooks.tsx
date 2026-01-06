@@ -196,6 +196,8 @@ import * as Sharing from 'expo-sharing';
 // import axios from 'axios';
 // import {Api_url} from './config/config.js'
 import api from "../api/api";
+import { useLang } from './language';
+
 
 interface Ebook {
   id: string;
@@ -206,6 +208,7 @@ interface Ebook {
 }
 
 const EbookScreen = () => {
+  const { t } = useLang();
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -219,19 +222,20 @@ const EbookScreen = () => {
 
         const formatted = ebooksArray.map((item: any) => ({
           id: item._id || item.id || Math.random().toString(),
-          title: item.title || 'Untitled',
-          subject: item.subject || '-',
+          title: item.title || t.untitled,
+          subject: item.subject || t.notAvailable,
           pdfurl: item.pdfUrl?.startsWith('http')
             ? item.pdfUrl
             : `${api.defaults.baseURL}${item.pdfUrl}`,
-          author: item.author || '-',
+          author: item.author || t.notAvailable,
         }));
         setEbooks(formatted);
       } catch (err) {
         Alert.alert(
-          'Error',
-          'Failed to load ebooks. Please check your network or server.'
+          t.error,
+          t.failedToLoadEbooks
         );
+
         setEbooks([]);
       } finally {
         setLoading(false);
@@ -308,7 +312,8 @@ const EbookScreen = () => {
           
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Author:</Text>
+              <Text style={styles.detailLabel}>{t.author}:</Text>
+
               <Text style={styles.detailValue}>{item.author}</Text>
             </View>
           </View>
@@ -319,7 +324,8 @@ const EbookScreen = () => {
             style={[styles.downloadButton, { backgroundColor: subjectColor }]}
             onPress={() => handleDownload(item)}
           >
-            Download PDF
+           {t.downloadPdf}
+
           </Button>
         </Card.Actions>
       </Card>
@@ -341,8 +347,11 @@ const EbookScreen = () => {
           <Text style={styles.headerIconText}>📖</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>E-Books Library</Text>
-          <Text style={styles.headerSubtitle}>{ebooks.length} e-books available</Text>
+          <Text style={styles.headerTitle}>{t.ebooksLibrary}</Text>
+          <Text style={styles.headerSubtitle}>
+            {ebooks.length} {t.ebooksAvailable}
+          </Text>
+
         </View>
       </View>
 
@@ -357,8 +366,8 @@ const EbookScreen = () => {
             <View style={styles.emptyIcon}>
               <Text style={styles.emptyIconText}>📚</Text>
             </View>
-            <Text style={styles.emptyTitle}>No e-books available</Text>
-            <Text style={styles.emptyText}>No e-books found in the library</Text>
+            <Text style={styles.emptyTitle}>{t.noEbooks}</Text>
+            <Text style={styles.emptyText}>{t.noEbooksDesc}</Text>
           </View>
         }
       />

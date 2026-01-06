@@ -11,9 +11,12 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '@/api/api';
+import { useLang } from '../language';
+
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { t } = useLang();   
 
   // 🔔 SYSTEM (TOP BAR) NOTIFICATION
   useEffect(() => {
@@ -88,7 +91,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: t.home,
           tabBarIcon: ({ color }) => (
             <Ionicons name="home" size={28} color={color} />
           ),
@@ -98,7 +101,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t.settings,
           tabBarIcon: ({ color }) => (
             <Ionicons name="settings" size={28} color={color} />
           ),

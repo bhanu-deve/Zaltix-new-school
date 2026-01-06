@@ -846,7 +846,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/api";
-
+import { useLang } from './language';
 
 /* =========================
    TYPES
@@ -866,6 +866,8 @@ interface StudentData {
    COMPONENT
 ========================= */
 export default function ReportsScreen() {
+  const { t } = useLang();
+
   const [student, setStudent] = useState<StudentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -949,10 +951,8 @@ export default function ReportsScreen() {
     return (
       <LinearGradient colors={['#edf5ff', '#fdfdfd']} style={styles.gradient}>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>📄 No Report Available</Text>
-          <Text style={styles.emptyText}>
-            Report has not been published for this exam yet.
-          </Text>
+          <Text style={styles.emptyTitle}>📄 {t.noReport}</Text>
+          <Text style={styles.emptyText}>{t.noReportDesc}</Text>
         </View>
       </LinearGradient>
     );
@@ -1033,11 +1033,12 @@ export default function ReportsScreen() {
           <View style={styles.profileInfoContainer}>
             <Text style={styles.profileName}>{student.name}</Text>
             <Text style={styles.profileDetails}>
-              Class {student.class} • Roll {student.rollNo}
+              {t.class} {student.class} • {t.rollNo} {student.rollNo}
             </Text>
           </View>
           <View style={styles.gradeChip}>
-            <Text style={styles.gradeChipLabel}>Overall</Text>
+            <Text style={styles.gradeChipLabel}>{t.overall}</Text>
+
             <Text style={styles.gradeChipValue}>{student.grade}</Text>
           </View>
         </View>
@@ -1045,24 +1046,25 @@ export default function ReportsScreen() {
         {/* SUMMARY */}
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, styles.summaryTotal]}>
-            <Text style={styles.summaryLabel}>Total Marks</Text>
+            <Text style={styles.summaryLabel}>{t.totalMarks}</Text>
             <Text style={styles.summaryValue}>
               {student.totalMarks}/{maxMarks}
             </Text>
           </View>
           <View style={[styles.summaryCard, styles.summaryAverage]}>
-            <Text style={styles.summaryLabel}>Average</Text>
+            <Text style={styles.summaryLabel}>{t.average}</Text>
             <Text style={styles.summaryValue}>{student.average}%</Text>
           </View>
         </View>
 
         {/* SUBJECT TABLE */}
-        <Text style={styles.sectionTitle}>Subject Performance</Text>
+        <Text style={styles.sectionTitle}>{t.subjectPerformance}</Text>
+
         <View style={styles.tableCard}>
           <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderSubject}>Subject</Text>
-            <Text style={styles.tableHeaderMarks}>Marks</Text>
-            <Text style={styles.tableHeaderGrade}>Grade</Text>
+            <Text style={styles.tableHeaderSubject}>{t.subject}</Text>
+            <Text style={styles.tableHeaderMarks}>{t.marks}</Text>
+            <Text style={styles.tableHeaderGrade}>{t.grade}</Text>
           </View>
 
           {reportCardData.map((item, index) => (
@@ -1085,8 +1087,9 @@ export default function ReportsScreen() {
         {/* FINAL GRADE */}
         <View style={styles.finalGradeCard}>
           <Text style={styles.finalGradeLabel}>
-            Overall Grade - {currentExamLabel}
+            {t.overallGrade} - {currentExamLabel}
           </Text>
+
           <Text style={styles.finalGradeValue}>{student.grade}</Text>
         </View>
       </ScrollView>

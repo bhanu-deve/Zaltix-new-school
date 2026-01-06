@@ -29,6 +29,8 @@ import studentAuthRoute from "./routes/studentAuthRoute.js";
 
 import ReportSubjectRoute from "./routes/ReportSubjectRoute.js";
 
+
+
 import http from 'http';
 import { Server } from 'socket.io';
 import BusLocation from "./models/BusLocation.js";
