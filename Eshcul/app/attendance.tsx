@@ -265,8 +265,11 @@ import { Calendar } from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../api/api';
+import { useLang } from './language';
+
 
 export default function AttendanceScreen() {
+  const { t } = useLang();
   const [student, setStudent] = useState<any>(null);
   const [attendanceData, setAttendanceData] = useState<any>({});
   const [loading, setLoading] = useState(true);
@@ -364,13 +367,13 @@ export default function AttendanceScreen() {
           <ScrollView contentContainerStyle={styles.scrollContent}>
             <LinearGradient colors={['#dbeafe', '#e0f2fe']} style={styles.headerChip}>
               <View>
-                <Text style={styles.headerTitle}>Attendance</Text>
+                <Text style={styles.headerTitle}>{t.attendance}</Text>
                 <Text style={styles.headerSubtitle}>
                   Overview for {student?.name || ''}
                 </Text>
               </View>
               <View style={styles.headerBadge}>
-                <Text style={styles.headerBadgeLabel}>Overall</Text>
+                <Text style={styles.headerBadgeLabel}>{t.overall}</Text>
                 <Text style={styles.headerBadgeValue}>{totalPercentage}%</Text>
               </View>
             </LinearGradient>
@@ -390,24 +393,22 @@ export default function AttendanceScreen() {
 
                 <View style={styles.summaryRow}>
                   <View style={[styles.statCard, { backgroundColor: '#e8f5e9' }]}>
-                    <Text>Present</Text>
+                    <Text>{t.present}</Text>
                     <Text style={styles.statValue}>{presentDays}</Text>
                   </View>
                   <View style={[styles.statCard, { backgroundColor: '#ffebee' }]}>
-                    <Text>Absent</Text>
+                    <Text>{t.absent}</Text>
                     <Text style={styles.statValue}>{absentDays}</Text>
                   </View>
                   <View style={[styles.statCard, { backgroundColor: '#e3f2fd' }]}>
-                    <Text>Total %</Text>
+                    <Text>{t.totalPercentage}</Text>
                     <Text style={styles.statValue}>{totalPercentage}</Text>
                   </View>
                 </View>
 
                 {selected && (
                   <View style={styles.detailsCard}>
-                    <Text style={styles.detailsHeaderText}>
-                      Details for {selected}
-                    </Text>
+                    <Text>{t.detailsFor} {selected}</Text>
                     {selectedSubjects.length ? (
                       selectedSubjects.map((s: any) => (
                         <View key={s.subject} style={styles.subjectRow}>
@@ -418,7 +419,7 @@ export default function AttendanceScreen() {
                         </View>
                       ))
                     ) : (
-                      <Text>No data</Text>
+                      <Text>{t.noData}</Text>
                     )}
                   </View>
                 )}

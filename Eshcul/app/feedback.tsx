@@ -190,8 +190,11 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 // import {Api_url} from './config/config.js'
 import  api  from "@/api/api";
+import { useLang } from './language';
 
 const FeedbackScreen = () => {
+  const { t } = useLang();
+
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
   const [open, setOpen] = useState(false);
@@ -207,8 +210,8 @@ const FeedbackScreen = () => {
     if (!selectedTeacher || !feedback || rating === 0) {
       Toast.show({
         type: 'error',
-        text1: 'Incomplete Form',
-        text2: 'Please complete all fields before submitting.',
+        text1: t.incompleteForm,
+        text2: t.completeAllFields,
       });
       return;
     }
@@ -222,8 +225,8 @@ const FeedbackScreen = () => {
 
       Toast.show({
         type: 'success',
-        text1: 'Success',
-        text2: res.data.message || 'Feedback submitted successfully!',
+        text1: t.success,
+        text2: t.feedbackSubmitted,
       });
 
       // Reset fields
@@ -234,8 +237,8 @@ const FeedbackScreen = () => {
       console.error(err);
       Toast.show({
         type: 'error',
-        text1: 'Submission Failed',
-        text2: 'Could not submit feedback. Try again.',
+        text1: t.submissionFailed,
+        text2: t.tryAgain,
       });
     }
   };
@@ -247,8 +250,9 @@ const FeedbackScreen = () => {
           <Text style={styles.headerIconText}>💬</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Teacher Feedback</Text>
-          <Text style={styles.headerSubtitle}>Share your experience with teachers</Text>
+          <Text style={styles.headerTitle}>{t.teacherFeedback}</Text>
+          <Text style={styles.headerSubtitle}>{t.shareExperience}</Text>
+
         </View>
       </View>
 
@@ -258,7 +262,7 @@ const FeedbackScreen = () => {
       >
         <View style={styles.formCard}>
           <View style={styles.section}>
-            <Text style={styles.label}>Select Teacher</Text>
+            <Text style={styles.label}>{t.selectTeacher}</Text>
             <DropDownPicker
               open={open}
               value={selectedTeacher}
@@ -266,7 +270,8 @@ const FeedbackScreen = () => {
               setOpen={setOpen}
               setValue={setSelectedTeacher}
               setItems={setTeachers}
-              placeholder="Choose a teacher"
+              placeholder={t.chooseTeacher}
+
               style={styles.dropdown}
               dropDownContainerStyle={styles.dropdownContainer}
               textStyle={styles.dropdownText}
@@ -275,20 +280,21 @@ const FeedbackScreen = () => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.label}>Your Feedback</Text>
+            <Text style={styles.label}>{t.yourFeedback}</Text>
             <TextInput
               style={styles.textInput}
               multiline
               numberOfLines={5}
               value={feedback}
               onChangeText={setFeedback}
-              placeholder="Write your feedback here..."
+              placeholder={t.writeFeedback}
+
               placeholderTextColor="#94a3b8"
             />
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.label}>Rate the Teacher</Text>
+            <Text style={styles.label}>{t.rateTeacher}</Text>
             <View style={styles.ratingContainer}>
               {[1, 2, 3, 4, 5].map((num) => (
                 <TouchableOpacity 
@@ -305,12 +311,14 @@ const FeedbackScreen = () => {
               ))}
             </View>
             <Text style={styles.ratingText}>
-              {rating === 0 ? 'Select a rating' : `${rating} out of 5 stars`}
+              {rating === 0   ? t.selectRating  : `${rating} ${t.outOf} 5 ${t.stars}`}
+
             </Text>
           </View>
 
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Submit Feedback</Text>
+            <Text style={styles.buttonText}>{t.submitFeedback}</Text>
+
           </TouchableOpacity>
         </View>
       </ScrollView>

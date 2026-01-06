@@ -262,6 +262,288 @@
 //     lineHeight: 20,
 //   },
 // });
+<<<<<<< HEAD
+=======
+// import React, { useEffect, useState } from 'react';
+// import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+// import { MaterialCommunityIcons, FontAwesome5, Entypo } from '@expo/vector-icons';
+// import moment from 'moment';
+// // import axios from 'axios';
+// // import {Api_url} from './config/config.js'
+// import api from "../api/api";
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// export default function ProjectScreen() {
+//   const [projects, setProjects] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const fetchProjects = async () => {
+//       try {
+//         const studentStr = await AsyncStorage.getItem('student');
+//         if (!studentStr) return;
+
+//         const student = JSON.parse(studentStr);
+
+//         const res = await api.get('/AddProject', {
+//           params: {
+//             className: student.grade,
+//             section: student.section,
+//           },
+//         });
+
+//         setProjects(res.data);
+//       } catch (err) {
+//         console.log('Project fetch error', err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProjects();
+//   }, []);
+
+//   const renderIcon = (subject) => {
+//     switch (subject?.toLowerCase()) {
+//       case 'mathematics':
+//         return <MaterialCommunityIcons name="math-compass" size={22} color="#3B82F6" />;
+//       case 'science':
+//         return <MaterialCommunityIcons name="atom" size={22} color="#10B981" />;
+//       case 'english':
+//         return <FontAwesome5 name="pen-fancy" size={20} color="#EF4444" />;
+//       case 'computer':
+//         return <Entypo name="laptop" size={20} color="#8B5CF6" />;
+//       default:
+//         return <Entypo name="book" size={20} color="#F59E0B" />;
+//     }
+//   };
+
+//   const getSubjectColor = (subject) => {
+//     switch (subject?.toLowerCase()) {
+//       case 'mathematics': return '#3B82F6';
+//       case 'science': return '#10B981';
+//       case 'english': return '#EF4444';
+//       case 'computer': return '#8B5CF6';
+//       default: return '#F59E0B';
+//     }
+//   };
+
+//   const formatDate = (dateStr) => moment(dateStr).format('MMM DD, YYYY');
+
+//   return (
+//     <View style={styles.container}>
+//       {/* Profile Card */}
+//       <View style={styles.profileCard}>
+//         <View style={styles.profileIcon}>
+//           <Text style={styles.profileIconText}>📚</Text>
+//         </View>
+//         <View style={styles.profileInfo}>
+//           <Text style={styles.profileName}>John Doe</Text>
+//           <View style={styles.profileDetails}>
+//             <View style={styles.detailItem}>
+//               <Text style={styles.detailLabel}>Class</Text>
+//               <Text style={styles.detailValue}>10</Text>
+//             </View>
+//             <View style={styles.detailItem}>
+//               <Text style={styles.detailLabel}>Section</Text>
+//               <Text style={styles.detailValue}>A</Text>
+//             </View>
+//             <View style={styles.detailItem}>
+//               <Text style={styles.detailLabel}>Roll No</Text>
+//               <Text style={styles.detailValue}>23</Text>
+//             </View>
+//           </View>
+//         </View>
+//       </View>
+
+//       {loading ? (
+//         <ActivityIndicator size="large" color="#3b82f6" style={styles.loader} />
+//       ) : (
+//         <FlatList
+//           data={projects}
+//           keyExtractor={(item, i) => item._id || i.toString()}
+//           renderItem={({ item }) => {
+//             const color = getSubjectColor(item.subject);
+//             return (
+//               <View style={[styles.projectCard, { borderLeftColor: color, borderLeftWidth: 5 }]}>
+//                 <View style={styles.cardHeader}>
+//                   <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
+//                     {renderIcon(item.subject)}
+//                   </View>
+//                   <View style={styles.subjectInfo}>
+//                     <Text style={styles.subjectText}>{item.subject}</Text>
+//                     <View style={styles.dueDateBadge}>
+//                       <Text style={styles.dueDateText}>📅 {formatDate(item.dueDate)}</Text>
+//                     </View>
+//                   </View>
+//                 </View>
+                
+//                 <Text style={styles.projectTitle}>{item.title}</Text>
+                
+//                 <View style={styles.detailsRow}>
+//                   <View style={[styles.classBadge, { backgroundColor: color + '15' }]}>
+//                     <Text style={[styles.classText, { color }]}>Class {item.class}</Text>
+//                   </View>
+//                 </View>
+                
+//                 {item.description && (
+//                   <View style={styles.descriptionBox}>
+//                     <Text style={styles.descriptionLabel}>Description:</Text>
+//                     <Text style={styles.descriptionText}>{item.description}</Text>
+//                   </View>
+//                 )}
+//               </View>
+//             );
+//           }}
+//           contentContainerStyle={styles.list}
+//           showsVerticalScrollIndicator={false}
+//         />
+//       )}
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#f8fafc',
+//     paddingHorizontal: 16,
+//     paddingTop: 16,
+//   },
+//   loader: {
+//     marginTop: 50,
+//   },
+//   profileCard: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 14,
+//     padding: 16,
+//     marginBottom: 20,
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     borderWidth: 1,
+//     borderColor: '#f1f5f9',
+//   },
+//   profileIcon: {
+//     width: 60,
+//     height: 60,
+//     borderRadius: 12,
+//     backgroundColor: '#e0f2fe',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginRight: 14,
+//   },
+//   profileIconText: {
+//     fontSize: 28,
+//   },
+//   profileInfo: {
+//     flex: 1,
+//   },
+//   profileName: {
+//     fontSize: 18,
+//     fontWeight: '700',
+//     color: '#1e293b',
+//     marginBottom: 8,
+//   },
+//   profileDetails: {
+//     flexDirection: 'row',
+//     gap: 16,
+//   },
+//   detailItem: {
+//     flex: 1,
+//   },
+//   detailLabel: {
+//     fontSize: 12,
+//     color: '#64748b',
+//     marginBottom: 2,
+//   },
+//   detailValue: {
+//     fontSize: 14,
+//     fontWeight: '600',
+//     color: '#475569',
+//   },
+//   list: {
+//     paddingBottom: 20,
+//   },
+//   projectCard: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 14,
+//     padding: 16,
+//     marginBottom: 12,
+//     borderWidth: 1,
+//     borderColor: '#f1f5f9',
+//   },
+//   cardHeader: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: 12,
+//   },
+//   iconContainer: {
+//     width: 50,
+//     height: 50,
+//     borderRadius: 12,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginRight: 12,
+//   },
+//   subjectInfo: {
+//     flex: 1,
+//   },
+//   subjectText: {
+//     fontSize: 16,
+//     fontWeight: '700',
+//     color: '#1e293b',
+//     marginBottom: 4,
+//   },
+//   dueDateBadge: {
+//     alignSelf: 'flex-start',
+//   },
+//   dueDateText: {
+//     fontSize: 12,
+//     color: '#64748b',
+//     fontWeight: '500',
+//   },
+//   projectTitle: {
+//     fontSize: 18,
+//     fontWeight: '700',
+//     color: '#1e293b',
+//     marginBottom: 12,
+//   },
+//   detailsRow: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginBottom: 12,
+//   },
+//   classBadge: {
+//     paddingHorizontal: 12,
+//     paddingVertical: 6,
+//     borderRadius: 8,
+//   },
+//   classText: {
+//     fontSize: 13,
+//     fontWeight: '600',
+//   },
+//   descriptionBox: {
+//     backgroundColor: '#f8fafc',
+//     borderRadius: 10,
+//     padding: 12,
+//     marginTop: 4,
+//   },
+//   descriptionLabel: {
+//     fontSize: 13,
+//     fontWeight: '600',
+//     color: '#475569',
+//     marginBottom: 4,
+//   },
+//   descriptionText: {
+//     fontSize: 14,
+//     color: '#475569',
+//     lineHeight: 20,
+//   },
+// });
+
+
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
 
 import React, { useEffect, useState } from 'react';
 import { 
@@ -282,21 +564,64 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import moment from 'moment';
 import api from "../api/api";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLang } from './language';
 
 export default function ProjectScreen() {
+  const { t } = useLang();
+
+  /* ===================== 1️⃣ ADD THESE STATES (TOP) ===================== */
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+<<<<<<< HEAD
   const [submissionModal, setSubmissionModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [submissionNote, setSubmissionNote] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+=======
+  const [student, setStudent] = useState<any>(null);
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
 
+  /* ===================== 2️⃣ LOAD STUDENT + FETCH PROJECTS ===================== */
   useEffect(() => {
+<<<<<<< HEAD
+=======
+    const fetchProjects = async () => {
+      try {
+        // 🔹 GET STUDENT FROM STORAGE
+        const studentStr = await AsyncStorage.getItem('student');
+
+        if (!studentStr) {
+          setLoading(false); // ✅ IMPORTANT
+          return;
+        }
+
+        const studentData = JSON.parse(studentStr);
+        setStudent(studentData);
+
+        // 🔹 CLASS + SECTION WISE API CALL
+        const res = await api.get('/AddProject', {
+          params: {
+            className: studentData.grade,
+            section: studentData.section,
+          },
+        });
+
+        setProjects(res.data);
+      } catch (err) {
+        console.log('Project fetch error', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
     fetchProjects();
     requestPermissions();
   }, []);
 
+<<<<<<< HEAD
   const requestPermissions = async () => {
     await ImagePicker.requestMediaLibraryPermissionsAsync();
   };
@@ -531,33 +856,71 @@ export default function ProjectScreen() {
       </View>
     );
   }
+=======
+  /* ===================== ICON HELPERS (NO CHANGE) ===================== */
+  const renderIcon = (subject: string) => {
+    switch (subject?.toLowerCase()) {
+      case 'mathematics':
+        return <MaterialCommunityIcons name="math-compass" size={22} color="#3B82F6" />;
+      case 'science':
+        return <MaterialCommunityIcons name="atom" size={22} color="#10B981" />;
+      case 'english':
+        return <FontAwesome5 name="pen-fancy" size={20} color="#EF4444" />;
+      case 'computer':
+        return <Entypo name="laptop" size={20} color="#8B5CF6" />;
+      default:
+        return <Entypo name="book" size={20} color="#F59E0B" />;
+    }
+  };
+
+  const getSubjectColor = (subject: string) => {
+    switch (subject?.toLowerCase()) {
+      case 'mathematics': return '#3B82F6';
+      case 'science': return '#10B981';
+      case 'english': return '#EF4444';
+      case 'computer': return '#8B5CF6';
+      default: return '#F59E0B';
+    }
+  };
+
+  const formatDate = (dateStr: string) =>
+    moment(dateStr).format('MMM DD, YYYY');
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
 
   return (
     <View style={styles.container}>
-      {/* Profile Card */}
+
+      {/* ===================== 3️⃣ PROFILE CARD (DYNAMIC) ===================== */}
       <View style={styles.profileCard}>
         <View style={styles.profileIcon}>
           <MaterialCommunityIcons name="account-circle" size={50} color="#3B82F6" />
         </View>
+
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>John Doe</Text>
+          <Text style={styles.profileName}>
+            {student?.name || t.student}
+          </Text>
+
           <View style={styles.profileDetails}>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Class</Text>
-              <Text style={styles.detailValue}>10</Text>
+              <Text style={styles.detailLabel}>{t.class}</Text>
+              <Text style={styles.detailValue}>{student?.grade || '-'}</Text>
             </View>
+
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Section</Text>
-              <Text style={styles.detailValue}>A</Text>
+              <Text style={styles.detailLabel}>{t.section}</Text>
+              <Text style={styles.detailValue}>{student?.section || '-'}</Text>
             </View>
+
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Roll No</Text>
-              <Text style={styles.detailValue}>23</Text>
+              <Text style={styles.detailLabel}>{t.rollNo}</Text>
+              <Text style={styles.detailValue}>{student?.rollNumber || '-'}</Text>
             </View>
           </View>
         </View>
       </View>
 
+<<<<<<< HEAD
       {projects.length === 0 ? (
         <View style={styles.emptyState}>
           <MaterialCommunityIcons name="file-document-outline" size={60} color="#94a3b8" />
@@ -573,13 +936,40 @@ export default function ProjectScreen() {
             const color = getSubjectColor(item.subject);
             const isSubmitted = item.status === 'submitted';
             
+=======
+      {/* ===================== 4️⃣ LOADER ===================== */}
+      {loading && (
+        <ActivityIndicator size="large" color="#3b82f6" style={styles.loader} />
+      )}
+
+      {/* ===================== 5️⃣ EMPTY STATE ===================== */}
+      {!loading && projects.length === 0 && (
+        <Text style={{ textAlign: 'center', marginTop: 40 }}>
+          📘 {t.noProjects}
+        </Text>
+
+      )}
+
+      {/* ===================== 6️⃣ PROJECT LIST ===================== */}
+      {!loading && projects.length > 0 && (
+        <FlatList
+          data={projects}
+          keyExtractor={(item: any) => item._id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.list}
+          renderItem={({ item }: any) => {
+            const color = getSubjectColor(item.subject);
+
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
             return (
               <View style={[styles.projectCard, { borderLeftColor: color, borderLeftWidth: 5 }]}>
                 <View style={styles.cardHeader}>
                   <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
                     {renderIcon(item.subject)}
                   </View>
+
                   <View style={styles.subjectInfo}>
+<<<<<<< HEAD
                     <Text style={styles.subjectText}>{item.subject || 'Unknown Subject'}</Text>
                     <View style={styles.dueDateBadge}>
                       <Text style={styles.dueDateText}>📅 Due: {formatDate(item.dueDate)}</Text>
@@ -612,19 +1002,30 @@ export default function ProjectScreen() {
                       <Text style={styles.submitButtonText}>Submit</Text>
                     </TouchableOpacity>
                   )}
-                </View>
-                
-                {item.description && (
-                  <View style={styles.descriptionBox}>
-                    <Text style={styles.descriptionLabel}>Description:</Text>
-                    <Text style={styles.descriptionText}>{item.description}</Text>
+=======
+                    <Text style={styles.subjectText}>{item.subject}</Text>
+                    <Text style={styles.dueDateText}>
+                      📅 {formatDate(item.dueDate)}
+                    </Text>
                   </View>
-                )}
+                </View>
+
+                <Text style={styles.projectTitle}>{item.title}</Text>
+
+                <View style={styles.classBadge}>
+                  <Text style={[styles.classText, { color }]}>
+                    {t.class} {item.class} - {item.section}
+                  </Text>
+                </View>
+
+                <View style={styles.descriptionBox}>
+                  <Text style={styles.descriptionLabel}>{t.description}:</Text>
+                  <Text style={styles.descriptionText}>{item.description}</Text>
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
+                </View>
               </View>
             );
           }}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
         />
       )}
 
@@ -761,7 +1162,9 @@ export default function ProjectScreen() {
   );
 }
 
+/* ===================== STYLES (UNCHANGED) ===================== */
 const styles = StyleSheet.create({
+<<<<<<< HEAD
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -787,9 +1190,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 16,
+=======
+  container: { flex: 1, backgroundColor: '#f8fafc', padding: 16 },
+  loader: { marginTop: 50 },
+
+  profileCard: {
+    backgroundColor: '#fff',
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
     borderRadius: 14,
     padding: 16,
     flexDirection: 'row',
+<<<<<<< HEAD
     alignItems: 'center',
     elevation: 2,
     shadowColor: '#000',
@@ -829,9 +1240,27 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 16,
     paddingBottom: 20,
+=======
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
   },
+  profileIcon: {
+    width: 60, height: 60, borderRadius: 12,
+    backgroundColor: '#e0f2fe',
+    alignItems: 'center', justifyContent: 'center', marginRight: 14,
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
+  },
+  profileIconText: { fontSize: 28 },
+  profileInfo: { flex: 1 },
+  profileName: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
+  profileDetails: { flexDirection: 'row', gap: 16 },
+  detailItem: { flex: 1 },
+  detailLabel: { fontSize: 12, color: '#64748b' },
+  detailValue: { fontSize: 14, fontWeight: '600' },
+
+  list: { paddingBottom: 20 },
   projectCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderRadius: 14,
     padding: 16,
     marginBottom: 12,
@@ -841,12 +1270,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
+  cardHeader: { flexDirection: 'row', marginBottom: 12 },
   iconContainer: {
+<<<<<<< HEAD
     width: 50,
     height: 50,
     borderRadius: 12,
@@ -882,12 +1308,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+=======
+    width: 50, height: 50, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center', marginRight: 12,
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
   },
+  subjectInfo: { flex: 1 },
+  subjectText: { fontSize: 16, fontWeight: '700' },
+  dueDateText: { fontSize: 12, color: '#64748b' },
+
+  projectTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
+
   classBadge: {
+    alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
+    backgroundColor: '#f1f5f9',
+    marginBottom: 10,
   },
+<<<<<<< HEAD
   classText: {
     fontSize: 13,
     fontWeight: '600',
@@ -917,10 +1357,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+=======
+  classText: { fontSize: 13, fontWeight: '600' },
+
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
   descriptionBox: {
     backgroundColor: '#f8fafc',
     borderRadius: 10,
     padding: 12,
+<<<<<<< HEAD
     marginTop: 8,
   },
   descriptionLabel: {
@@ -1135,3 +1580,9 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
+=======
+  },
+  descriptionLabel: { fontSize: 13, fontWeight: '600', marginBottom: 4 },
+  descriptionText: { fontSize: 14, lineHeight: 20 },
+});
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524

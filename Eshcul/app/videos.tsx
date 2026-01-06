@@ -181,6 +181,7 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 // import {Api_url} from './config/config.js'
 import api from "../api/api";
+import { useLang } from './language';
 
 type VideoItem = {
   _id: string;
@@ -191,6 +192,7 @@ type VideoItem = {
 };
 
 export default function VideosScreen() {
+  const { t } = useLang();
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -261,8 +263,11 @@ export default function VideosScreen() {
           <Text style={styles.headerIconText}>🎬</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Teacher Videos</Text>
-          <Text style={styles.headerSubtitle}>{videos.length} videos available</Text>
+          <Text style={styles.headerTitle}>{t.teacherVideos}</Text>
+          <Text style={styles.headerSubtitle}>
+            {videos.length} {t.videosAvailable}
+          </Text>
+
         </View>
       </View>
 
@@ -275,8 +280,9 @@ export default function VideosScreen() {
             <View style={styles.emptyIcon}>
               <FontAwesome name="video-camera" size={50} color="#cbd5e1" />
             </View>
-            <Text style={styles.emptyTitle}>No videos available</Text>
-            <Text style={styles.emptyText}>Check back later for new content</Text>
+            <Text style={styles.emptyTitle}>{t.noVideos}</Text>
+            <Text style={styles.emptyText}>{t.checkLaters}</Text>
+
           </View>
         ) : (
           videos.map((item) => {
@@ -292,8 +298,9 @@ export default function VideosScreen() {
                   <View style={styles.subjectRow}>
                     <View style={[styles.subjectBadge, { backgroundColor: subjectColor + '20' }]}>
                       <Text style={[styles.subjectText, { color: subjectColor }]}>
-                        {item.subject}
+                        {t.subjects[item.subject.toLowerCase()] ?? item.subject}
                       </Text>
+
                     </View>
                     <View style={styles.playIconContainer}>
                       <FontAwesome name="play-circle" size={24} color={subjectColor} />
@@ -307,7 +314,8 @@ export default function VideosScreen() {
                   <View style={styles.videoFooter}>
                     <View style={styles.durationBadge}>
                       <FontAwesome name="clock-o" size={12} color="#64748b" />
-                      <Text style={styles.durationText}>Watch Now</Text>
+                      <Text style={styles.durationText}>{t.watchNow}</Text>
+
                     </View>
                   </View>
                 </View>

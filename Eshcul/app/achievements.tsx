@@ -321,6 +321,7 @@ import * as Sharing from 'expo-sharing';
 import { WebView } from 'react-native-webview';
 // import {Api_url} from './config/config.js'
 import api from "../api/api";
+import { useLang } from './language';
 
 interface Achievement {
   id: string;
@@ -334,6 +335,7 @@ interface Achievement {
 }
 
 const AchievementsScreen = () => {
+  const { t } = useLang();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -351,8 +353,9 @@ const AchievementsScreen = () => {
 
         const formatted = achievementsArray.map((item: any) => ({
           id: item._id?.$oid || item._id || Math.random().toString(),
-          title: item.title || 'Untitled',
-          student: item.student || 'Unknown',
+          title: item.title || t.untitled,
+          student: item.student || t.unknown,
+
           date: item.date || '-',
           description: item.description || '-',
           category: item.category || 'General',
@@ -448,17 +451,17 @@ const AchievementsScreen = () => {
           
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>👤 Student:</Text>
+              <Text style={styles.detailLabel}>👤 {t.student}:</Text>
               <Text style={styles.detailValue}>{item.student}</Text>
             </View>
             
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>📅 Date:</Text>
+              <Text style={styles.detailLabel}>📅 {t.date}:</Text>
               <Text style={styles.detailValue}>{item.date}</Text>
             </View>
             
             <View style={styles.descriptionBox}>
-              <Text style={styles.descriptionLabel}>Description:</Text>
+              <Text style={styles.descriptionLabel}>{t.description}:</Text>
               <Text style={styles.descriptionText}>{item.description}</Text>
             </View>
           </View>
@@ -469,7 +472,7 @@ const AchievementsScreen = () => {
             style={[styles.viewButton, { backgroundColor: categoryColor }]}
             onPress={() => handleViewFile(item)}
           >
-            View Achievement
+           {t.viewAchievement}
           </Button>
         </Card.Actions>
       </Card>
@@ -491,8 +494,11 @@ const AchievementsScreen = () => {
           <Text style={styles.headerIconText}>🏆</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>Achievements</Text>
-          <Text style={styles.headerSubtitle}>{achievements.length} achievements</Text>
+          <Text style={styles.headerTitle}>{t.achievements}</Text>
+          <Text style={styles.headerSubtitle}>
+            {achievements.length} {t.achievements}
+          </Text>
+
         </View>
       </View>
 
@@ -507,8 +513,8 @@ const AchievementsScreen = () => {
             <View style={styles.emptyIcon}>
               <Text style={styles.emptyIconText}>🏆</Text>
             </View>
-            <Text style={styles.emptyTitle}>No achievements found</Text>
-            <Text style={styles.emptyText}>Check back later for new achievements</Text>
+            <Text style={styles.emptyTitle}>{t.noAchievements}</Text>
+            <Text style={styles.emptyText}>{t.checkLater}</Text>
           </View>
         }
       />
@@ -557,7 +563,7 @@ const AchievementsScreen = () => {
                     }]}
                     onPress={handleDownload}
                   >
-                    Download
+                    {t.download}
                   </Button>
                   <Button
                     mode="outlined"
@@ -567,7 +573,8 @@ const AchievementsScreen = () => {
                     }}
                     style={styles.closeButton}
                   >
-                    Close
+                    {t.close}
+
                   </Button>
                 </View>
               </>

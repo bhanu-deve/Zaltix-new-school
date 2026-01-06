@@ -391,13 +391,22 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../api/api';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLang } from './language';
+
 
 export default function TimetableScreen() {
+  const { t } = useLang();
+
   const [timetable, setTimetable] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState('Monday');
 
-  const className = '10A';
+  // const className = '10A';
+  // const section = 'A';
+  const [className, setClassName] = useState('');
+  const [section, setSection] = useState('');
+
 
   const periodTimeMap: { [key: number]: string } = {
     0: '9:00 - 10:00',
@@ -408,23 +417,35 @@ export default function TimetableScreen() {
     5: '3:00 - 4:00',
   };
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = t.days; // comes from language file
+
+    useEffect(() => {
+      const loadUser = async () => {
+        const cls = await AsyncStorage.getItem("className");
+        const sec = await AsyncStorage.getItem("section");
+
+        setClassName(cls || '');
+        setSection(sec || '');
+      };
+
+      loadUser();
+    }, []);
 
   useEffect(() => {
-    const fetchTimetable = async () => {
-      try {
-        const res = await api.get(`/timetable/${className}`);
-        console.log('Fetched timetable:', res.data);
-        setTimetable(res.data.data);
-      } catch (err) {
-        console.error('Failed to fetch timetable:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (!className || !section) return;
 
-    fetchTimetable();
-  }, []);
+      const fetchTimetable = async () => {
+        const res = await api.get(`/timetable/${className}`, {
+          params: { section }
+        });
+
+        setTimetable(res.data.data);
+        setLoading(false);
+      };
+
+      fetchTimetable();
+    }, [className, section]);
+
 
   if (loading) {
     return (
@@ -460,13 +481,14 @@ export default function TimetableScreen() {
           style={styles.headerChip}
         >
           <View>
-            <Text style={styles.headerTitle}>Timetable</Text>
+            <Text style={styles.headerTitle}>{t.timetable}</Text>
             <Text style={styles.headerSubtitle}>
-              Class {timetable.className} • Section {timetable.section}
+              {t.class} {timetable.className} • {t.section} {timetable.section}
             </Text>
           </View>
           <View style={styles.headerBadge}>
-            <Text style={styles.headerBadgeLabel}>Year</Text>
+            <Text style={styles.headerBadgeLabel}>{t.year}</Text>
+
             <Text style={styles.headerBadgeValue}>{timetable.academicYear}</Text>
           </View>
         </LinearGradient>
@@ -506,14 +528,15 @@ export default function TimetableScreen() {
 
           {currentDayEntries.length === 0 ? (
             <View style={styles.emptySchedule}>
-              <Text style={styles.emptyScheduleText}>No classes</Text>
+              <Text style={styles.emptyScheduleText}>{t.noClasses}</Text>
             </View>
           ) : (
             <View style={styles.tableContainer}>
               <View style={styles.tableHeader}>
-                <Text style={styles.tableHeaderText}>Period</Text>
-                <Text style={styles.tableHeaderText}>Time</Text>
-                <Text style={styles.tableHeaderText}>Subject / Teacher</Text>
+                <Text style={styles.tableHeaderText}>{t.period}</Text>
+                <Text style={styles.tableHeaderText}>{t.time}</Text>
+                <Text style={styles.tableHeaderText}>{t.subjectTeacher}</Text>
+
               </View>
               
               {currentDayEntries.map((subject: string, index: number) => {
@@ -521,13 +544,19 @@ export default function TimetableScreen() {
                 return (
                   <View key={index} style={styles.tableRow}>
                     <View style={styles.periodCell}>
-                      <Text style={styles.periodNumber}>P{index + 1}</Text>
+                      <Text style={styles.periodNumber}>
+                        {t.periodShort} {index + 1}
+                      </Text>
+
                     </View>
                     <View style={styles.timeCell}>
                       <Text style={styles.timeText}>{periodTimeMap[index]}</Text>
                     </View>
                     <View style={styles.subjectCell}>
-                      <Text style={styles.subjectText}>{subject}</Text>
+                      <Text style={styles.subjectText}>
+                        {t.subjects[subject.toLowerCase()] ?? subject}
+                      </Text>
+
                       <Text style={styles.teacherText}>{teacher}</Text>
                     </View>
                   </View>
@@ -540,7 +569,8 @@ export default function TimetableScreen() {
         {/* Compact Subjects Section */}
         <View style={styles.subjectsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Subjects</Text>
+            <Text style={styles.sectionTitle}>{t.subjectsTitle}</Text>
+
           </View>
 
           {timetable.subjects && Object.keys(timetable.subjects).length > 0 ? (
@@ -570,7 +600,7 @@ export default function TimetableScreen() {
 }
 
 const getSubjectColor = (subjectName: string) => {
-  const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+  const colors = ['#ef4444', '#82817fff', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
   return colors[subjectName.charCodeAt(0) % colors.length];
 };
 

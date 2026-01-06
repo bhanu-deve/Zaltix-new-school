@@ -13,14 +13,19 @@ export const createSubject = async (req, res) => {
 // GET subjects (optionally by class)
 export const getSubjects = async (req, res) => {
   try {
-    const { className } = req.query;
-    const filter = className ? { className } : {};
+    const { className, section } = req.query;
+
+    const filter = {};
+    if (className) filter.className = className;
+    if (section) filter.section = section;
+
     const subjects = await Subject.find(filter).exec();
     res.json(subjects);
   } catch {
     res.status(500).json({ error: 'Failed to fetch subjects' });
   }
 };
+
 
 // UPDATE subject
 export const updateSubject = async (req, res) => {

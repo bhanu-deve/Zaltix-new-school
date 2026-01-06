@@ -78,9 +78,24 @@ export default function LoginPage() {
 
       console.log("LOGIN API RESPONSE:", res.data);
 
+<<<<<<< HEAD
       // Save JWT & student profile
+=======
+
+      const student = res.data.student;
+
+      // ✅ build className correctly
+      const className = `${student.grade}${student.section}`;
+
+>>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
       await AsyncStorage.setItem("token", res.data.token);
-      await AsyncStorage.setItem("student", JSON.stringify(res.data.student));
+      await AsyncStorage.setItem("student", JSON.stringify(student));
+
+      await AsyncStorage.setItem("rollNo", student.rollNumber.toString());
+
+      await AsyncStorage.setItem("className", className); // ✅ FIXED
+      await AsyncStorage.setItem("section", student.section);
+
 
       Toast.show({
         type: "success",

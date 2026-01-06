@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  Mobile app MUST use the SAME IP
 */
 const api = axios.create({
-  baseURL:  'http://192.168.29.126:5000',  // ✅ YOUR SERVER IP
+  baseURL:  'http://192.168.29.241:5000',  // ✅ YOUR SERVER IP
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -20,8 +20,12 @@ api.interceptors.request.use(
   async (config) => {
     try {
       const token = await AsyncStorage.getItem("token");
+      const role = await AsyncStorage.getItem("role");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+      if (role) {
+        config.headers["x-user-role"] = role; // ✅ ADD THIS
       }
     } catch (e) {
       console.log("Token read error:", e);

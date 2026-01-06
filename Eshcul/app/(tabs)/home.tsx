@@ -224,37 +224,123 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/v
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '@/api/api';
+import { socket } from "@/api/socket";
+import { useLang } from '../language';
+
+
 
 const cardData = [
-  { name: 'Attendance', icon: (c: string) => <Ionicons name="calendar" size={28} color={c} />, bgColor: '#e3f4ff' },
-  { name: 'Timetable', icon: (c: string) => <Ionicons name="time" size={28} color={c} />, bgColor: '#e5f7f2' },
-  { name: 'Dairy', icon: (c: string) => <MaterialCommunityIcons name="notebook-outline" size={28} color={c} />, bgColor: '#ffeef3' },
-  { name: 'Fees', icon: (c: string) => <FontAwesome5 name="money-bill-wave" size={28} color={c} />, bgColor: '#fff3e0' },
-  { name: 'Reports', icon: (c: string) => <Ionicons name="document-text-outline" size={28} color={c} />, bgColor: '#fbe9e7' },
-  { name: 'Project Work', icon: (c: string) => <MaterialCommunityIcons name="file-document-edit-outline" size={28} color={c} />, bgColor: '#e8f5e9' },
-  { name: 'Videos/Gallery', icon: (c: string) => <Ionicons name="images-outline" size={28} color={c} />, bgColor: '#ede7f6' },
-  { name: 'Mock Test', icon: (c: string) => <MaterialCommunityIcons name="clipboard-check-outline" size={28} color={c} />, bgColor: '#fff8e1' },
-  { name: 'E Books', icon: (c: string) => <MaterialCommunityIcons name="book-outline" size={28} color={c} />, bgColor: '#e1f5fe' },
-  { name: 'Achievements', icon: (c: string) => <FontAwesome5 name="medal" size={26} color={c} />, bgColor: '#f9fbe7' },
-  { name: 'Bus Tracking', icon: (c: string) => <FontAwesome5 name="bus" size={26} color={c} />, bgColor: '#f1f8e9' },
-  { name: 'Feedback', icon: (c: string) => <Feather name="message-square" size={28} color={c} />, bgColor: '#f3e5f5' },
-  { name: 'Inventory', icon: (c: string) => <MaterialCommunityIcons name="warehouse" size={28} color={c} />, bgColor: '#fffde7' },
-  { name: 'Chat Box', icon: (c: string) => <Ionicons name="chatbubble-ellipses-outline" size={28} color={c} />, bgColor: '#ede7f6' },
+  { key: 'attendance',name: 'Attendance', icon: (c: string) => <Ionicons name="calendar" size={28} color={c} />, bgColor: '#e3f4ff' },
+  { key: 'timetable',name: 'Timetable', icon: (c: string) => <Ionicons name="time" size={28} color={c} />, bgColor: '#e5f7f2' },
+  { key: 'dairy',name: 'Dairy', icon: (c: string) => <MaterialCommunityIcons name="notebook-outline" size={28} color={c} />, bgColor: '#ffeef3' },
+  { key: 'fees',name: 'Fees', icon: (c: string) => <FontAwesome5 name="money-bill-wave" size={28} color={c} />, bgColor: '#fff3e0' },
+  { key: 'reports',name: 'Reports', icon: (c: string) => <Ionicons name="document-text-outline" size={28} color={c} />, bgColor: '#fbe9e7' },
+  { key: 'project-work',name: 'Project Work', icon: (c: string) => <MaterialCommunityIcons name="file-document-edit-outline" size={28} color={c} />, bgColor: '#e8f5e9' },
+  { key: 'videos-gallery',name: 'Videos/Gallery', icon: (c: string) => <Ionicons name="images-outline" size={28} color={c} />, bgColor: '#ede7f6' },
+  { key: 'mock-test',name: 'Mock Test', icon: (c: string) => <MaterialCommunityIcons name="clipboard-check-outline" size={28} color={c} />, bgColor: '#fff8e1' },
+  { key: 'e-books',name: 'E Books', icon: (c: string) => <MaterialCommunityIcons name="book-outline" size={28} color={c} />, bgColor: '#e1f5fe' },
+  { key: 'achievements',name: 'Achievements', icon: (c: string) => <FontAwesome5 name="medal" size={26} color={c} />, bgColor: '#f9fbe7' },
+  { key: 'bus-tracking',name: 'Bus Tracking', icon: (c: string) => <FontAwesome5 name="bus" size={26} color={c} />, bgColor: '#f1f8e9' },
+  { key: 'feedback',name: 'Feedback', icon: (c: string) => <Feather name="message-square" size={28} color={c} />, bgColor: '#f3e5f5' },
+  { key: 'inventory',name: 'Inventory', icon: (c: string) => <MaterialCommunityIcons name="warehouse" size={28} color={c} />, bgColor: '#fffde7' },
+  { key: 'chat-box',name: 'Chat Box', icon: (c: string) => <Ionicons name="chatbubble-ellipses-outline" size={28} color={c} />, bgColor: '#ede7f6' },
 ];
 
 const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
 const cardSize = (screenWidth - 40 - numColumns * 16) / numColumns;
 
+
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useLang();
+
   const [student, setStudent] = useState<any>(null);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [latestNotification, setLatestNotification] = useState<any>(null);
+    // 🔹 LOAD STUDENT FROM ASYNC STORAGE
+  useEffect(() => {
+    const loadStudent = async () => {
+      try {
+        const s = await AsyncStorage.getItem('student');
+        if (s) {
+          setStudent(JSON.parse(s));
+        }
+      } catch (e) {
+        console.log('Error loading student', e);
+      }
+    };
+
+    loadStudent();
+  }, []);
+
+
+  // ✅ ADD THIS LINE HERE
+  const [lastSeenTime, setLastSeenTime] = useState<number>(0);
+
+
 
   useEffect(() => {
-    (async () => {
-      const s = await AsyncStorage.getItem('student');
-      if (s) setStudent(JSON.parse(s));
-    })();
+    socket.on("new-notification", (notification) => {
+      setLatestNotification(notification);
+      setNotificationCount((c) => c + 1);
+    });
+
+    return () => {
+      socket.off("new-notification");
+    };
+  }, []);
+
+  /* LOAD NOTIFICATIONS (CLASS-WISE) */
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const s = await AsyncStorage.getItem('student');
+        if (!s) return;
+
+        const studentData = JSON.parse(s);
+        const studentClass = `${studentData.grade}-${studentData.section}`;
+
+
+        const res = await api.get('/AddNotification');
+        const data = Array.isArray(res.data) ? res.data : [];
+
+        const filtered = data.filter(
+          n => n.audience === 'ALL' || n.audience === studentClass
+        );
+
+
+        if (filtered.length === 0) {
+          setNotificationCount(0);
+          setLatestNotification(null);
+          return;
+        }
+
+        // 🔑 SORT LATEST FIRST
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        );
+
+        const latestTime = new Date(filtered[0].createdAt).getTime();
+        const storedLastSeen = await AsyncStorage.getItem('lastSeenNotificationTime');
+
+        if (!storedLastSeen || latestTime > Number(storedLastSeen)) {
+          // ✅ NEW NOTIFICATION ARRIVED
+          setNotificationCount(filtered.length);
+          setLatestNotification(filtered[0]);
+          await AsyncStorage.setItem('notificationsRead', 'false');
+        } else {
+          // ✅ NO NEW NOTIFICATION
+          setNotificationCount(0);
+        }
+      } catch (e) {}
+    };
+
+
+    loadNotifications();
   }, []);
 
   const handleCardPress = (name: string) => {
@@ -277,9 +363,18 @@ export default function HomeScreen() {
     if (routes[name]) router.push(routes[name]);
   };
 
-  const handleNotificationPress = () => {
+  const handleNotificationPress = async () => {
+    if (latestNotification?.createdAt) {
+      await AsyncStorage.setItem(
+        'lastSeenNotificationTime',
+        new Date(latestNotification.createdAt).getTime().toString()
+      );
+    }
+
+    setNotificationCount(0); // ✅ hide badge immediately
     router.push('/notifications');
   };
+
 
   return (
     <LinearGradient colors={['#f4fbff', '#fdfefe']} style={styles.gradientContainer}>
@@ -297,8 +392,9 @@ export default function HomeScreen() {
             />
           </View>
           <View style={styles.schoolTextWrapper}>
-            <Text style={styles.schoolName}>NARAYANA</Text>
-            <Text style={styles.schoolSubTitle}>Educational Institutions</Text>
+            <Text style={styles.schoolName}>{t.schoolName}</Text>
+            <Text style={styles.schoolSubTitle}>{t.schoolSubTitle}</Text>
+
           </View>
         </View>
 
@@ -311,12 +407,12 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.profileInfo}>
-              <Text style={styles.profileGreeting}>Welcome</Text>
+              <Text style={styles.profileGreeting}>{t.welcome ?? 'Welcome'}</Text>
               <Text style={styles.profileName}>{student?.name || 'Student'}</Text>
               <Text style={styles.profileMeta}>
-                Class {student?.grade || '-'} • Section {student?.section || '-'}
+                {t.class} {student?.grade || '-'} • {t.section} {student?.section || '-'}
               </Text>
-              <Text style={styles.profileMeta}>Roll No: {student?.rollNumber || '-'}</Text>
+              <Text style={styles.profileMeta}>{t.rollNo}: {student?.rollNumber || '-'}</Text>
             </View>
           </View>
 
@@ -333,23 +429,56 @@ export default function HomeScreen() {
         </View>
 
         {/* Notification card */}
+        {/* Notification card – UI SAME, DATA DYNAMIC */}
         <TouchableOpacity
           style={styles.notificationCard}
           activeOpacity={0.9}
           onPress={handleNotificationPress}
         >
           <View style={styles.notificationLeft}>
-            <Text style={styles.notificationTitle}>Notifications</Text>
-            <Text style={styles.notificationSubtitle}>Exam results and updates are now available</Text>
-            <Text style={styles.notificationDate}>22nd April, 2020</Text>
+            <Text style={styles.notificationTitle}>{t.notifications}</Text>
+
+            <Text style={styles.notificationSubtitle}>
+              {latestNotification?.message || 'No new notifications'}
+            </Text>
+
+            <Text style={styles.notificationDate}>
+              {latestNotification
+                ? new Date(latestNotification.createdAt).toLocaleDateString()
+                : ''}
+            </Text>
           </View>
+
           <View style={styles.notificationRight}>
-            <View style={styles.notificationIconWrapper}>
-              <Ionicons name="notifications-outline" size={26} color="#1e88e5" />
-            </View>
-            <View style={styles.newBadge}>
-              <Text style={styles.newBadgeText}>NEW</Text>
-            </View>
+              <View style={styles.notificationIconWrapper}>
+                <View style={{ position: 'relative' }}>
+                  <Ionicons name="notifications-outline" size={26} color="#1e88e5" />
+
+                  {notificationCount > 0 && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: -6,
+                        right: -6,
+                        backgroundColor: 'red',
+                        borderRadius: 10,
+                        minWidth: 18,
+                        height: 18,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingHorizontal: 4,
+                      }}
+                    >
+                      <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>
+                        {notificationCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+
+
           </View>
         </TouchableOpacity>
 
@@ -367,7 +496,8 @@ export default function HomeScreen() {
             >
               <View style={[styles.card, { backgroundColor: item.bgColor }]}>
                 <View style={styles.cardIconContainer}>{item.icon('#1e88e5')}</View>
-                <Text style={styles.cardText}>{item.name}</Text>
+                <Text style={styles.cardText}>{t[item.key] ?? item.name}</Text>
+
               </View>
             </TouchableOpacity>
           )}

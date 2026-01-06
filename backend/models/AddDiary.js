@@ -9,6 +9,10 @@ const diarySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  section: {
+    type: String,
+    required: true, // 🔥 IMPORTANT
+  },
   subject: {
     type: String,
     required: true,

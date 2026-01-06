@@ -12,14 +12,22 @@ export const createProject = async (req, res) => {
 };
 
 // GET all projects
+// GET projects (CLASS + SECTION FILTER)
 export const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find().exec();
+    const { className, section } = req.query;
+
+    const filter = {};
+    if (className) filter.class = className;
+    if (section) filter.section = section;
+
+    const projects = await Project.find(filter).sort({ createdAt: -1 });
     res.json(projects);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // UPDATE project
 export const updateProject = async (req, res) => {
