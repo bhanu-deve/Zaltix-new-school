@@ -547,14 +547,13 @@ import * as Location from 'expo-location';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useLang } from './language';
 
-
-/* ================== 👉 ADD THIS (SOCKET) ================== */
+/* ================= SOCKET ================= */
 import { io } from "socket.io-client";
 
 const socket = io("http://192.168.29.241:3000", {
   transports: ["websocket"],
 });
-/* ========================================================= */
+/* ========================================== */
 
 // Conditionally import MapView only on native platforms
 let MapView: any = null;
@@ -571,21 +570,15 @@ if (Platform.OS !== 'web') {
 }
 
 export default function BusTrackingScreen() {
+  const { t } = useLang(); // ✅ REQUIRED (LANGUAGE FIX)
+
   const [location, setLocation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  /* ========== 👉 ADD THIS (LIVE BUS LOCATION STATE) ========== */
+  /* ===== LIVE BUS LOCATION ===== */
   const [busLocation, setBusLocation] = useState<any>(null);
-  /* ========================================================== */
 
-  /* ❌ REMOVE THIS (MOCK DATA)
-  const busLocation = {
-    latitude: 17.4065,
-    longitude: 78.4772,
-  };
-  */
-
-  /* ================= LOCATION PERMISSION ================= */
+  /* ===== LOCATION PERMISSION ===== */
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -600,9 +593,9 @@ export default function BusTrackingScreen() {
     })();
   }, []);
 
-  /* ================= 👉 ADD THIS (SOCKET LISTENER) ================= */
+  /* ===== SOCKET LISTENER ===== */
   useEffect(() => {
-    const BUS_ID = "BUS101"; // 👉 MUST MATCH DRIVER BUS ID
+    const BUS_ID = "BUS101"; // must match driver busId
 
     socket.emit("join-bus", BUS_ID);
 
@@ -617,7 +610,6 @@ export default function BusTrackingScreen() {
       socket.off("bus-location");
     };
   }, []);
-  /* ================================================================= */
 
   return (
     <View style={styles.container}>
@@ -647,7 +639,7 @@ export default function BusTrackingScreen() {
             pinColor="#3B82F6"
           />
 
-          {/* ========== 👉 LIVE BUS MARKER ========== */}
+          {/* BUS LOCATION (LIVE) */}
           {busLocation && (
             <Marker
               coordinate={busLocation}
@@ -655,7 +647,6 @@ export default function BusTrackingScreen() {
               pinColor="#10B981"
             />
           )}
-          {/* ======================================= */}
         </MapView>
       ) : (
         <Text>Map not available</Text>
@@ -664,40 +655,30 @@ export default function BusTrackingScreen() {
       <View style={styles.busDetails}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>🚌 {t.busDetails}</Text>
-          <View style={[styles.busStatus, { backgroundColor: '#10B981' + '20' }]}>
-            <Text style={[styles.busStatusText, { color: '#10B981' }]}>{t.onTime}</Text>
+          <View style={[styles.busStatus, { backgroundColor: '#10B98120' }]}>
+            <Text style={[styles.busStatusText, { color: '#10B981' }]}>
+              {t.onTime}
+            </Text>
           </View>
         </View>
-        
+
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
-            <View style={[styles.detailIcon, { backgroundColor: '#3B82F6' + '20' }]}>
-              <Text style={[styles.detailIconText, { color: '#3B82F6' }]}>🚌</Text>
-            </View>
             <Text style={styles.detailLabel}>{t.busNo}</Text>
             <Text style={styles.detailValue}>TS 09 AB 1234</Text>
           </View>
-          
+
           <View style={styles.detailItem}>
-            <View style={[styles.detailIcon, { backgroundColor: '#F59E0B' + '20' }]}>
-              <FontAwesome5 name="user-tie" size={16} color="#F59E0B" />
-            </View>
             <Text style={styles.detailLabel}>{t.driver}</Text>
             <Text style={styles.detailValue}>Ramesh Kumar</Text>
           </View>
-          
+
           <View style={styles.detailItem}>
-            <View style={[styles.detailIcon, { backgroundColor: '#EF4444' + '20' }]}>
-              <FontAwesome5 name="clock" size={16} color="#EF4444" />
-            </View>
             <Text style={styles.detailLabel}>{t.eta}</Text>
             <Text style={styles.detailValue}>8:25 AM</Text>
           </View>
-          
+
           <View style={styles.detailItem}>
-            <View style={[styles.detailIcon, { backgroundColor: '#8B5CF6' + '20' }]}>
-              <FontAwesome5 name="phone" size={16} color="#8B5CF6" />
-            </View>
             <Text style={styles.detailLabel}>{t.contact}</Text>
             <Text style={styles.detailValue}>+91 98765 43210</Text>
           </View>
@@ -728,8 +709,37 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fff',
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  busStatus: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  busStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  detailsGrid: {
+    marginTop: 16,
+  },
+  detailItem: {
+    marginBottom: 10,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
   },
 });
