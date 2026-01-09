@@ -262,8 +262,7 @@
 //     lineHeight: 20,
 //   },
 // });
-<<<<<<< HEAD
-=======
+
 // import React, { useEffect, useState } from 'react';
 // import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 // import { MaterialCommunityIcons, FontAwesome5, Entypo } from '@expo/vector-icons';
@@ -543,57 +542,49 @@
 // });
 
 
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
-
-import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  ActivityIndicator, 
-  TouchableOpacity,
-  Alert,
-  Modal,
-  TextInput,
-  ScrollView,
-  Image
-} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import api from "../api/api";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLang } from './language';
 
 export default function ProjectScreen() {
   const { t } = useLang();
 
-  /* ===================== 1️⃣ ADD THESE STATES (TOP) ===================== */
+  /* ===================== STATES ===================== */
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
   const [submissionModal, setSubmissionModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [submissionNote, setSubmissionNote] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [submitting, setSubmitting] = useState(false);
-=======
-  const [student, setStudent] = useState<any>(null);
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
+  const [student, setStudent] = useState(null);
 
-  /* ===================== 2️⃣ LOAD STUDENT + FETCH PROJECTS ===================== */
+  /* ===================== LOAD STUDENT + FETCH PROJECTS ===================== */
   useEffect(() => {
-<<<<<<< HEAD
-=======
     const fetchProjects = async () => {
       try {
         // 🔹 GET STUDENT FROM STORAGE
         const studentStr = await AsyncStorage.getItem('student');
 
         if (!studentStr) {
-          setLoading(false); // ✅ IMPORTANT
+          setLoading(false);
           return;
         }
 
@@ -611,33 +602,21 @@ export default function ProjectScreen() {
         setProjects(res.data);
       } catch (err) {
         console.log('Project fetch error', err);
+        Alert.alert('Error', 'Failed to load projects');
       } finally {
         setLoading(false);
       }
     };
 
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
     fetchProjects();
     requestPermissions();
   }, []);
 
-<<<<<<< HEAD
   const requestPermissions = async () => {
     await ImagePicker.requestMediaLibraryPermissionsAsync();
   };
 
-  const fetchProjects = async () => {
-    try {
-      const res = await api.get(`/AddProject`);
-      setProjects(res.data);
-    } catch (err) {
-      console.error('Failed to fetch projects', err);
-      Alert.alert('Error', 'Failed to load projects');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  /* ===================== HELPER FUNCTIONS ===================== */
   const renderIcon = (subject) => {
     if (!subject) return <MaterialCommunityIcons name="book" size={22} color="#F59E0B" />;
     
@@ -748,9 +727,9 @@ export default function ProjectScreen() {
         formData.append('note', submissionNote);
       }
 
-      // Add student info (you might want to get this from auth context)
-      formData.append('studentName', 'John Doe');
-      formData.append('studentId', 'john_doe_123');
+      // Add student info
+      formData.append('studentName', student?.name || 'Student');
+      formData.append('studentId', student?._id || '');
       formData.append('submittedAt', new Date().toISOString());
 
       // Add attachments
@@ -856,41 +835,10 @@ export default function ProjectScreen() {
       </View>
     );
   }
-=======
-  /* ===================== ICON HELPERS (NO CHANGE) ===================== */
-  const renderIcon = (subject: string) => {
-    switch (subject?.toLowerCase()) {
-      case 'mathematics':
-        return <MaterialCommunityIcons name="math-compass" size={22} color="#3B82F6" />;
-      case 'science':
-        return <MaterialCommunityIcons name="atom" size={22} color="#10B981" />;
-      case 'english':
-        return <FontAwesome5 name="pen-fancy" size={20} color="#EF4444" />;
-      case 'computer':
-        return <Entypo name="laptop" size={20} color="#8B5CF6" />;
-      default:
-        return <Entypo name="book" size={20} color="#F59E0B" />;
-    }
-  };
-
-  const getSubjectColor = (subject: string) => {
-    switch (subject?.toLowerCase()) {
-      case 'mathematics': return '#3B82F6';
-      case 'science': return '#10B981';
-      case 'english': return '#EF4444';
-      case 'computer': return '#8B5CF6';
-      default: return '#F59E0B';
-    }
-  };
-
-  const formatDate = (dateStr: string) =>
-    moment(dateStr).format('MMM DD, YYYY');
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
 
   return (
     <View style={styles.container}>
-
-      {/* ===================== 3️⃣ PROFILE CARD (DYNAMIC) ===================== */}
+      {/* PROFILE CARD */}
       <View style={styles.profileCard}>
         <View style={styles.profileIcon}>
           <MaterialCommunityIcons name="account-circle" size={50} color="#3B82F6" />
@@ -898,69 +846,52 @@ export default function ProjectScreen() {
 
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>
-            {student?.name || t.student}
+            {student?.name || t.student || 'Student'}
           </Text>
 
           <View style={styles.profileDetails}>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>{t.class}</Text>
+              <Text style={styles.detailLabel}>{t?.class || 'Class'}</Text>
               <Text style={styles.detailValue}>{student?.grade || '-'}</Text>
             </View>
 
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>{t.section}</Text>
+              <Text style={styles.detailLabel}>{t?.section || 'Section'}</Text>
               <Text style={styles.detailValue}>{student?.section || '-'}</Text>
             </View>
 
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>{t.rollNo}</Text>
+              <Text style={styles.detailLabel}>{t?.rollNo || 'Roll No'}</Text>
               <Text style={styles.detailValue}>{student?.rollNumber || '-'}</Text>
             </View>
           </View>
         </View>
       </View>
 
-<<<<<<< HEAD
-      {projects.length === 0 ? (
-        <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="file-document-outline" size={60} color="#94a3b8" />
-          <Text style={styles.emptyStateText}>No projects assigned</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={projects}
-          keyExtractor={(item, i) => item?._id?.toString() || i.toString()}
-          renderItem={({ item }) => {
-            if (!item) return null;
-            
-            const color = getSubjectColor(item.subject);
-            const isSubmitted = item.status === 'submitted';
-            
-=======
-      {/* ===================== 4️⃣ LOADER ===================== */}
+      {/* LOADER */}
       {loading && (
         <ActivityIndicator size="large" color="#3b82f6" style={styles.loader} />
       )}
 
-      {/* ===================== 5️⃣ EMPTY STATE ===================== */}
+      {/* EMPTY STATE */}
       {!loading && projects.length === 0 && (
-        <Text style={{ textAlign: 'center', marginTop: 40 }}>
-          📘 {t.noProjects}
-        </Text>
-
+        <View style={styles.emptyState}>
+          <MaterialCommunityIcons name="file-document-outline" size={60} color="#94a3b8" />
+          <Text style={styles.emptyStateText}>No projects assigned</Text>
+        </View>
       )}
 
-      {/* ===================== 6️⃣ PROJECT LIST ===================== */}
+      {/* PROJECT LIST */}
       {!loading && projects.length > 0 && (
         <FlatList
           data={projects}
-          keyExtractor={(item: any) => item._id}
+          keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.list}
-          renderItem={({ item }: any) => {
+          renderItem={({ item }) => {
             const color = getSubjectColor(item.subject);
+            const isSubmitted = item.status === 'submitted';
 
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
             return (
               <View style={[styles.projectCard, { borderLeftColor: color, borderLeftWidth: 5 }]}>
                 <View style={styles.cardHeader}>
@@ -969,40 +900,6 @@ export default function ProjectScreen() {
                   </View>
 
                   <View style={styles.subjectInfo}>
-<<<<<<< HEAD
-                    <Text style={styles.subjectText}>{item.subject || 'Unknown Subject'}</Text>
-                    <View style={styles.dueDateBadge}>
-                      <Text style={styles.dueDateText}>📅 Due: {formatDate(item.dueDate)}</Text>
-                    </View>
-                  </View>
-                </View>
-                
-                <Text style={styles.projectTitle}>{item.title || 'Untitled Project'}</Text>
-                
-                <View style={styles.detailsRow}>
-                  <View style={[styles.classBadge, { backgroundColor: color + '15' }]}>
-                    <Text style={[styles.classText, { color }]}>
-                      Class {item.class || 'N/A'}
-                    </Text>
-                  </View>
-                  
-                  {isSubmitted ? (
-                    <View style={[styles.statusBadge, { backgroundColor: '#10B98120' }]}>
-                      <MaterialCommunityIcons name="check-circle" size={14} color="#10B981" />
-                      <Text style={[styles.statusText, { color: '#10B981' }]}>
-                        Submitted
-                      </Text>
-                    </View>
-                  ) : (
-                    <TouchableOpacity 
-                      style={[styles.submitButton, { backgroundColor: color }]}
-                      onPress={() => handleSubmitProject(item)}
-                    >
-                      <MaterialCommunityIcons name="upload" size={16} color="#fff" />
-                      <Text style={styles.submitButtonText}>Submit</Text>
-                    </TouchableOpacity>
-                  )}
-=======
                     <Text style={styles.subjectText}>{item.subject}</Text>
                     <Text style={styles.dueDateText}>
                       📅 {formatDate(item.dueDate)}
@@ -1014,15 +911,31 @@ export default function ProjectScreen() {
 
                 <View style={styles.classBadge}>
                   <Text style={[styles.classText, { color }]}>
-                    {t.class} {item.class} - {item.section}
+                    {t?.class || 'Class'} {item.class} - {item.section}
                   </Text>
                 </View>
 
                 <View style={styles.descriptionBox}>
-                  <Text style={styles.descriptionLabel}>{t.description}:</Text>
+                  <Text style={styles.descriptionLabel}>{t?.description || 'Description'}:</Text>
                   <Text style={styles.descriptionText}>{item.description}</Text>
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
                 </View>
+
+                {isSubmitted ? (
+                  <View style={[styles.statusBadge, { backgroundColor: '#10B98120' }]}>
+                    <MaterialCommunityIcons name="check-circle" size={14} color="#10B981" />
+                    <Text style={[styles.statusText, { color: '#10B981' }]}>
+                      Submitted
+                    </Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity 
+                    style={[styles.submitButton, { backgroundColor: color }]}
+                    onPress={() => handleSubmitProject(item)}
+                  >
+                    <MaterialCommunityIcons name="upload" size={16} color="#fff" />
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             );
           }}
@@ -1162,9 +1075,7 @@ export default function ProjectScreen() {
   );
 }
 
-/* ===================== STYLES (UNCHANGED) ===================== */
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -1185,22 +1096,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#64748b',
   },
+  loader: {
+    marginTop: 50,
+  },
   profileCard: {
     backgroundColor: '#ffffff',
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 16,
-=======
-  container: { flex: 1, backgroundColor: '#f8fafc', padding: 16 },
-  loader: { marginTop: 50 },
-
-  profileCard: {
-    backgroundColor: '#fff',
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
     borderRadius: 14,
     padding: 16,
     flexDirection: 'row',
-<<<<<<< HEAD
     alignItems: 'center',
     elevation: 2,
     shadowColor: '#000',
@@ -1240,25 +1146,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 16,
     paddingBottom: 20,
-=======
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
   },
-  profileIcon: {
-    width: 60, height: 60, borderRadius: 12,
-    backgroundColor: '#e0f2fe',
-    alignItems: 'center', justifyContent: 'center', marginRight: 14,
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
-  },
-  profileIconText: { fontSize: 28 },
-  profileInfo: { flex: 1 },
-  profileName: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  profileDetails: { flexDirection: 'row', gap: 16 },
-  detailItem: { flex: 1 },
-  detailLabel: { fontSize: 12, color: '#64748b' },
-  detailValue: { fontSize: 14, fontWeight: '600' },
-
-  list: { paddingBottom: 20 },
   projectCard: {
     backgroundColor: '#fff',
     borderRadius: 14,
@@ -1270,9 +1158,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  cardHeader: { flexDirection: 'row', marginBottom: 12 },
+  cardHeader: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
   iconContainer: {
-<<<<<<< HEAD
     width: 50,
     height: 50,
     borderRadius: 12,
@@ -1289,9 +1179,6 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginBottom: 4,
   },
-  dueDateBadge: {
-    alignSelf: 'flex-start',
-  },
   dueDateText: {
     fontSize: 12,
     color: '#64748b',
@@ -1301,24 +1188,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: 16,
+    marginBottom: 10,
   },
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-=======
-    width: 50, height: 50, borderRadius: 12,
-    alignItems: 'center', justifyContent: 'center', marginRight: 12,
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
-  },
-  subjectInfo: { flex: 1 },
-  subjectText: { fontSize: 16, fontWeight: '700' },
-  dueDateText: { fontSize: 12, color: '#64748b' },
-
-  projectTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
-
   classBadge: {
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
@@ -1327,46 +1198,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
     marginBottom: 10,
   },
-<<<<<<< HEAD
   classText: {
     fontSize: 13,
     fontWeight: '600',
   },
-  submitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    gap: 4,
-  },
-  statusText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-=======
-  classText: { fontSize: 13, fontWeight: '600' },
-
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
   descriptionBox: {
     backgroundColor: '#f8fafc',
     borderRadius: 10,
     padding: 12,
-<<<<<<< HEAD
-    marginTop: 8,
+    marginBottom: 10,
   },
   descriptionLabel: {
     fontSize: 13,
@@ -1378,6 +1218,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#475569',
     lineHeight: 20,
+  },
+  submitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 6,
+    marginTop: 8,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 4,
+    marginTop: 8,
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   // Modal Styles
   modalOverlay: {
@@ -1580,9 +1449,3 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
-=======
-  },
-  descriptionLabel: { fontSize: 13, fontWeight: '600', marginBottom: 4 },
-  descriptionText: { fontSize: 14, lineHeight: 20 },
-});
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524

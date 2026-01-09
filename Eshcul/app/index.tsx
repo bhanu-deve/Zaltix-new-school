@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  Modal,
-  KeyboardAvoidingView,
-  Platform,
-  Dimensions
+  View
 } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from "../api/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const unstable_settings = {
   headerShown: false,
@@ -78,16 +78,14 @@ export default function LoginPage() {
 
       console.log("LOGIN API RESPONSE:", res.data);
 
-<<<<<<< HEAD
       // Save JWT & student profile
-=======
 
       const student = res.data.student;
 
       // ✅ build className correctly
       const className = `${student.grade}${student.section}`;
 
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
+
       await AsyncStorage.setItem("token", res.data.token);
       await AsyncStorage.setItem("student", JSON.stringify(student));
 

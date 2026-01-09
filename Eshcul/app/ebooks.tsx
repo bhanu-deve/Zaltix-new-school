@@ -224,38 +224,6 @@ const EbookScreen = () => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   useEffect(() => {
-<<<<<<< HEAD
-=======
-    const fetchEbooks = async () => {
-      try {
-        const res = await api.get('/AddEbook', { timeout: 5000 });
-        const ebooksArray = Array.isArray(res.data)
-          ? res.data
-          : res.data?.ebooks || res.data?.data || [];
-
-        const formatted = ebooksArray.map((item: any) => ({
-          id: item._id || item.id || Math.random().toString(),
-          title: item.title || t.untitled,
-          subject: item.subject || t.notAvailable,
-          pdfurl: item.pdfUrl?.startsWith('http')
-            ? item.pdfUrl
-            : `${api.defaults.baseURL}${item.pdfUrl}`,
-          author: item.author || t.notAvailable,
-        }));
-        setEbooks(formatted);
-      } catch (err) {
-        Alert.alert(
-          t.error,
-          t.failedToLoadEbooks
-        );
-
-        setEbooks([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
     fetchEbooks();
   }, []);
 
@@ -454,13 +422,8 @@ const EbookScreen = () => {
           
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-<<<<<<< HEAD
               <MaterialCommunityIcons name="account" size={16} color="#64748b" />
               <Text style={styles.detailLabel}>Author:</Text>
-=======
-              <Text style={styles.detailLabel}>{t.author}:</Text>
-
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
               <Text style={styles.detailValue}>{item.author}</Text>
             </View>
             
@@ -481,12 +444,7 @@ const EbookScreen = () => {
             onPress={() => handleDownload(item)}
             icon="download"
           >
-<<<<<<< HEAD
             Download
-=======
-           {t.downloadPdf}
-
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
           </Button>
         </Card.Actions>
       </Card>
@@ -622,7 +580,6 @@ const EbookScreen = () => {
         <View style={styles.headerIcon}>
           <MaterialCommunityIcons name="library" size={30} color="#3B82F6" />
         </View>
-<<<<<<< HEAD
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>E-Books Library</Text>
           <View style={styles.statsRow}>
@@ -639,14 +596,6 @@ const EbookScreen = () => {
               <Text style={styles.statLabel}>Subjects</Text>
             </View>
           </View>
-=======
-        <View>
-          <Text style={styles.headerTitle}>{t.ebooksLibrary}</Text>
-          <Text style={styles.headerSubtitle}>
-            {ebooks.length} {t.ebooksAvailable}
-          </Text>
-
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
         </View>
       </View>
 
@@ -753,7 +702,6 @@ const EbookScreen = () => {
             <View style={styles.emptyIcon}>
               <MaterialCommunityIcons name="book-search" size={50} color="#94a3b8" />
             </View>
-<<<<<<< HEAD
             <Text style={styles.emptyTitle}>No e-books found</Text>
             <Text style={styles.emptyText}>
               {searchQuery || selectedSubject !== 'All' 
@@ -772,10 +720,6 @@ const EbookScreen = () => {
                 <Text style={styles.resetButtonText}>Reset Filters</Text>
               </TouchableOpacity>
             )}
-=======
-            <Text style={styles.emptyTitle}>{t.noEbooks}</Text>
-            <Text style={styles.emptyText}>{t.noEbooksDesc}</Text>
->>>>>>> 1ceafad7f6eb594cd4cff6ca3b231ea807867524
           </View>
         }
       />

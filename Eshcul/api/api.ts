@@ -1,5 +1,5 @@
-import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from 'axios';
 
 /*
  IMPORTANT:
@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  Mobile app MUST use the SAME IP
 */
 const api = axios.create({
-  baseURL:  'http://192.168.29.241:5000',  // ✅ YOUR SERVER IP
+  baseURL:  'http://192.168.29.126:5000',  // ✅ YOUR SERVER IP
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
