@@ -391,6 +391,20 @@ const Projects = () => {
       toast.error('Failed to delete project.');
     }
   };
+  const fetchSubmissions = async (projectId) => {
+    try {
+      const res = await api.get(`/project-submissions/project/${projectId}`);
+      setSubmissions(res.data);
+      setShowSubmissions(true);
+    } catch (err) {
+      toast.error("Failed to load submissions");
+    }
+  };
+
+  const [submissions, setSubmissions] = useState([]);
+  const [showSubmissions, setShowSubmissions] = useState(false);
+
+
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-pink-50 to-rose-50">
@@ -553,9 +567,14 @@ const Projects = () => {
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex justify-center space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => fetchSubmissions(project._id)}
+                            >
                               <Eye className="w-4 h-4" />
                             </Button>
+
                             <Button size="sm" variant="outline" onClick={() => handleEdit(project)}>
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -578,6 +597,63 @@ const Projects = () => {
             </div>
           </CardContent>
         </Card>
+        {showSubmissions && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Student Submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>Note</TableHead>
+                    <TableHead>Files</TableHead>
+                    <TableHead>Submitted At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {submissions.length > 0 ? (
+                    submissions.map((s) => (
+                      <TableRow key={s._id}>
+                        <TableCell>{s.studentName}</TableCell>
+                        <TableCell>{s.note || '-'}</TableCell>
+                        <TableCell>
+                          {s.attachments.map((file, i) => (
+                            <a
+                              key={i}
+                              href={`http://localhost:5000${file}`}
+
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 underline block"
+                            >
+                              View File {i + 1}
+                            </a>
+                          ))}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(s.submittedAt).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center">
+                        No submissions yet
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+
+              <div className="mt-4 text-right">
+                <Button onClick={() => setShowSubmissions(false)}>Close</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
       </div>
     </div>
   );

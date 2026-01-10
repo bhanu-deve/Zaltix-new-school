@@ -53,7 +53,13 @@ export default function SettingsScreen() {
       text2: t.redirecting ?? 'You will be redirected shortly.',
     });
 
-    await AsyncStorage.multiRemove(['token', 'student']);
+    // await AsyncStorage.multiRemove(['token', 'student']);
+    await AsyncStorage.multiRemove([
+      'accessToken',
+      'refreshToken',
+      'student'
+    ]);
+
 
     setTimeout(() => {
       router.replace('/');
@@ -173,8 +179,11 @@ export default function SettingsScreen() {
                 toggle={() => setShowConfirm(!showConfirm)}
               />
               <TouchableOpacity style={styles.saveButton} onPress={handleChangePassword}>
-                {t.updatePassword ?? 'Update Password'}
+                <Text style={styles.saveText}>
+                  {t.updatePassword ?? 'Update Password'}
+                </Text>
               </TouchableOpacity>
+
             </View>
           )}
 

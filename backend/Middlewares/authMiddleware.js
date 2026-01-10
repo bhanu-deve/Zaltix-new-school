@@ -1,18 +1,42 @@
+// // middleware/authMiddleware.js
+// import jwt from "jsonwebtoken";
+// const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+
+// export const verifyToken = (req, res, next) => {
+//   const authHeader = req.headers["authorization"];
+//   const token = authHeader && authHeader.split(" ")[1];
+
+//   if (!token) return res.status(401).json({ message: "No token, access denied" });
+
+//   try {
+//     const verified = jwt.verify(token, process.env.JWT_SECRET);
+//     req.user = verified;
+//     next();
+//   } catch (err) {
+//     res.status(403).json({ message: "Invalid or expired token" });
+//   }
+// };
 // middleware/authMiddleware.js
+
 import jwt from "jsonwebtoken";
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
 
-  if (!token) return res.status(401).json({ message: "No token, access denied" });
+  if (!token) {
+    return res.status(401).json({ error: "No token, access denied" });
+  }
 
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_ACCESS_SECRET   // ✅ FIX HERE
+    );
+
+    req.user = decoded;
     next();
   } catch (err) {
-    res.status(403).json({ message: "Invalid or expired token" });
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 };

@@ -200,6 +200,7 @@ import * as Sharing from 'expo-sharing';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from "../api/api";
 import { useLang } from './language';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 interface Ebook {
@@ -231,39 +232,103 @@ const EbookScreen = () => {
     filterAndSortEbooks();
   }, [searchQuery, selectedSubject, sortBy, ebooks]);
 
+  // const fetchEbooks = async () => {
+  //   try {
+  //     const res = await api.get('/AddEbook', { timeout: 5000 });
+  //     const ebooksArray = res.data?.data || [];
+
+
+  //     const formatted = ebooksArray.map((item: any) => ({
+  //       id: item._id || item.id || Math.random().toString(),
+  //       title: item.title || 'Untitled',
+  //       subject: item.subject || 'General',
+  //       pdfurl: item.pdfUrl?.startsWith('http')
+  //         ? item.pdfUrl
+  //         : `${api.defaults.baseURL}${item.pdfUrl}`,
+  //       author: item.author || 'Unknown Author',
+  //       year: item.year || '',
+  //       description: item.description || '',
+  //     }));
+
+  //     setEbooks(formatted);
+  //     setFilteredEbooks(formatted);
+      
+  //     // Extract unique subjects
+  //     const uniqueSubjects: string[] = [
+  //       'All',
+  //       ...Array.from(
+  //         new Set<string>(
+  //           formatted.map((ebook: Ebook) => ebook.subject).filter(Boolean)
+  //         )
+  //       ),
+  //     ];
+
+  //     setSubjects(uniqueSubjects);
+
+  //   } catch (err) {
+  //     Alert.alert(
+  //       'Error',
+  //       'Failed to load ebooks. Please check your network or server.'
+  //     );
+  //     setEbooks([]);
+  //     setFilteredEbooks([]);
+  //     setSubjects(['All']);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchEbooks = async () => {
     try {
-      const res = await api.get('/AddEbook', { timeout: 5000 });
-      const ebooksArray = Array.isArray(res.data)
-        ? res.data
-        : res.data?.ebooks || res.data?.data || [];
+      // 1️⃣ Get logged-in student data
+      const studentStr = await AsyncStorage.getItem("student");
 
+      if (!studentStr) {
+        throw new Error("Student not logged in");
+      }
+
+      const student = JSON.parse(studentStr);
+
+      // 2️⃣ Send class & section to backend
+      const res = await api.get("/AddEbook", {
+        params: {
+          class: student.grade,      // OR student.class
+          section: student.section,  // VERY IMPORTANT
+        },
+        timeout: 5000,
+      });
+
+      const ebooksArray = res.data?.data || [];
+
+      // 3️⃣ Format as you already do
       const formatted = ebooksArray.map((item: any) => ({
-        id: item._id || item.id || Math.random().toString(),
-        title: item.title || 'Untitled',
-        subject: item.subject || 'General',
-        pdfurl: item.pdfUrl?.startsWith('http')
+        id: item._id,
+        title: item.title,
+        subject: item.subject,
+        pdfurl: item.pdfUrl?.startsWith("http")
           ? item.pdfUrl
           : `${api.defaults.baseURL}${item.pdfUrl}`,
-        author: item.author || 'Unknown Author',
-        year: item.year || '',
-        description: item.description || '',
+        author: item.author,
+        year: item.year || "",
+        description: item.description || "",
       }));
 
       setEbooks(formatted);
       setFilteredEbooks(formatted);
-      
-      // Extract unique subjects
-      const uniqueSubjects = ['All', ...new Set(formatted.map(ebook => ebook.subject).filter(Boolean))];
+
+      const uniqueSubjects: string[] = [
+        "All",
+        ...Array.from(
+          new Set<string>(formatted.map((e: Ebook) => e.subject))
+        ),
+      ];
+
       setSubjects(uniqueSubjects);
+
+
     } catch (err) {
-      Alert.alert(
-        'Error',
-        'Failed to load ebooks. Please check your network or server.'
-      );
+      Alert.alert("Error", "Failed to load ebooks");
       setEbooks([]);
       setFilteredEbooks([]);
-      setSubjects(['All']);
     } finally {
       setLoading(false);
     }

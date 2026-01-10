@@ -318,7 +318,15 @@ const EBooks = () => {
       : `/AddEbook`;
 
     try {
-      await api({ method, url, data: form });
+      await api({
+        method,
+        url,
+        data: form,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       toast.success(isEdit ? 'Book updated successfully!' : 'Book uploaded successfully!');
       resetForm();
       fetchBooks();
