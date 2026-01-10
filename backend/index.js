@@ -37,6 +37,9 @@ import BusLocation from "./models/BusLocation.js";
 
 import DriverAuthRoute from "./routes/driverAuthRoute.js";
 
+import SubmitProjectRoute from "./routes/SubmitProjectRoute.js";
+import ProjectSubmissionRoute from "./routes/ProjectSubmissionRoute.js";
+
 
 
 
@@ -95,6 +98,11 @@ io.on("connection", (socket) => {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/uploads/achievements', express.static(path.join(process.cwd(), 'uploads/achievements')));
+
 
 app.use("/api/auth", AuthRoute);
 
@@ -106,9 +114,11 @@ app.use("/report-subjects", ReportSubjectRoute);
 
 
 
-/* ===== STATIC FILES ===== */
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-app.use('/uploads/achievements', express.static(path.join(process.cwd(), 'uploads/achievements')));
+// /* ===== STATIC FILES ===== */
+// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// app.use('/uploads/achievements', express.static(path.join(process.cwd(), 'uploads/achievements')));
+
+
 
 app.use("/Addstaff", AddStaffRoute);
 app.use("/Addstock", AddStockRoute);
@@ -133,8 +143,9 @@ app.use("/students", AddStudent);
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/driver", DriverAuthRoute);
+app.use("/submitProject", SubmitProjectRoute);
 
-
+app.use("/project-submissions", ProjectSubmissionRoute);
 
 /* ===== DB ERROR HANDLER ===== */
 Db.on('error', (err) => console.error('MongoDB error:', err));

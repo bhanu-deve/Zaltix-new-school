@@ -563,18 +563,48 @@ import {
 import api from "../api/api";
 import { useLang } from './language';
 
+type Project = {
+  _id: string;
+  title: string;
+  subject: string;
+  class: string;
+  section: string;
+  dueDate: string;
+  description?: string;
+  status?: string;
+};
+
+type Student = {
+  id: string;
+  name: string;
+  grade: string;
+  section: string;
+  rollNumber: string;
+};
+
+type Attachment = {
+  type: 'image' | 'document';
+  uri: string;
+  name: string;
+  size?: number;
+  mimeType?: string;
+  width?: number;
+  height?: number;
+};
+
+
 export default function ProjectScreen() {
   const { t } = useLang();
 
   /* ===================== STATES ===================== */
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [submissionModal, setSubmissionModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [submissionNote, setSubmissionNote] = useState('');
-  const [attachments, setAttachments] = useState([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [student, setStudent] = useState(null);
+  const [student, setStudent] = useState<Student | null>(null);
 
   /* ===================== LOAD STUDENT + FETCH PROJECTS ===================== */
   useEffect(() => {
@@ -617,7 +647,7 @@ export default function ProjectScreen() {
   };
 
   /* ===================== HELPER FUNCTIONS ===================== */
-  const renderIcon = (subject) => {
+  const renderIcon = (subject: string) => {
     if (!subject) return <MaterialCommunityIcons name="book" size={22} color="#F59E0B" />;
     
     const lowerSubject = subject.toLowerCase();
@@ -628,7 +658,7 @@ export default function ProjectScreen() {
     return <MaterialCommunityIcons name="book" size={22} color="#F59E0B" />;
   };
 
-  const getSubjectColor = (subject) => {
+  const getSubjectColor = (subject: string) => {
     if (!subject) return '#F59E0B';
     
     const lowerSubject = subject.toLowerCase();
@@ -639,7 +669,7 @@ export default function ProjectScreen() {
     return '#F59E0B';
   };
 
-  const formatDate = (dateStr) => {
+  const formatDate = (dateStr: string) => {
     try {
       return moment(dateStr).format('MMM DD, YYYY');
     } catch (error) {
@@ -647,7 +677,7 @@ export default function ProjectScreen() {
     }
   };
 
-  const handleSubmitProject = (project) => {
+  const handleSubmitProject = (project: Project) => {
     setSelectedProject(project);
     setSubmissionModal(true);
   };
@@ -703,7 +733,7 @@ export default function ProjectScreen() {
     }
   };
 
-  const removeAttachment = (index) => {
+  const removeAttachment = (index: number) => {
     const newAttachments = [...attachments];
     newAttachments.splice(index, 1);
     setAttachments(newAttachments);
@@ -720,7 +750,7 @@ export default function ProjectScreen() {
       const formData = new FormData();
       
       // Add project ID
-      formData.append('projectId', selectedProject._id);
+      // formData.append('projectId', selectedProject._id);
       
       // Add note if exists
       if (submissionNote.trim()) {
@@ -729,8 +759,18 @@ export default function ProjectScreen() {
 
       // Add student info
       formData.append('studentName', student?.name || 'Student');
-      formData.append('studentId', student?._id || '');
+      // formData.append('studentId', student?._id || '');
+      // formData.append('studentId', student._id);
+      if (!student || !selectedProject) return;
+
+      formData.append('studentId', student.id);
+      formData.append('projectId', selectedProject._id);
+
+
       formData.append('submittedAt', new Date().toISOString());
+      formData.append('class', student?.grade);
+      formData.append('section', student?.section);
+
 
       // Add attachments
       attachments.forEach((attachment, index) => {
@@ -740,8 +780,9 @@ export default function ProjectScreen() {
         formData.append('attachments', {
           uri: attachment.uri,
           type: fileType,
-          name: fileName
-        });
+          name: fileName,
+        } as any);
+
       });
 
       // Submit to your API endpoint
@@ -765,10 +806,13 @@ export default function ProjectScreen() {
         
         resetSubmissionForm();
       }
-    } catch (error) {
-      console.error('Submission error:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to submit project. Please try again.');
-    } finally {
+    } catch (error: any) {
+        console.error('Submission error:', error);
+        Alert.alert(
+          'Error',
+          error?.response?.data?.message || 'Failed to submit project. Please try again.'
+        );
+      } finally {
       setSubmitting(false);
     }
   };
@@ -780,20 +824,21 @@ export default function ProjectScreen() {
     setAttachments([]);
   };
 
-  const getFileIcon = (type) => {
+  const getFileIcon = (type: string) => {
     if (type === 'image') {
       return <MaterialCommunityIcons name="image" size={24} color="#3B82F6" />;
     } else if (type === 'document') {
       return <MaterialCommunityIcons name="file-document" size={24} color="#10B981" />;
     } else if (type.includes('pdf')) {
-      return <MaterialCommunityIcons name="file-pdf" size={24} color="#EF4444" />;
+      return <MaterialCommunityIcons name="file-document-outline" size={24} color="#EF4444" />
+
     } else if (type.includes('word') || type.includes('document')) {
       return <MaterialCommunityIcons name="file-word" size={24} color="#2563EB" />;
     }
     return <MaterialCommunityIcons name="file" size={24} color="#64748b" />;
   };
 
-  const formatFileSize = (bytes) => {
+  const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -801,7 +846,8 @@ export default function ProjectScreen() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const renderAttachment = (attachment, index) => {
+  const renderAttachment = (attachment: Attachment, index: number) => {
+
     return (
       <View key={index} style={styles.attachmentItem}>
         <View style={styles.attachmentInfo}>
@@ -1009,7 +1055,8 @@ export default function ProjectScreen() {
                     <Text style={styles.attachmentsCount}>
                       {attachments.length} file{attachments.length !== 1 ? 's' : ''} selected
                     </Text>
-                    {attachments.map(renderAttachment)}
+                    {attachments.map((att, idx) => renderAttachment(att, idx))}
+
                   </View>
                 )}
               </View>

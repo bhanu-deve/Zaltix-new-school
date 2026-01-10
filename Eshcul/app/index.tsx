@@ -43,9 +43,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   // Clear old token on load
-  useEffect(() => {
-    AsyncStorage.clear();
-  }, []);
+
 
   // Timer for OTP resend
   useEffect(() => {
@@ -86,7 +84,10 @@ export default function LoginPage() {
       const className = `${student.grade}${student.section}`;
 
 
-      await AsyncStorage.setItem("token", res.data.token);
+      // await AsyncStorage.setItem("token", res.data.token);
+      await AsyncStorage.setItem("accessToken", res.data.accessToken);
+      await AsyncStorage.setItem("refreshToken", res.data.refreshToken);
+
       await AsyncStorage.setItem("student", JSON.stringify(student));
 
       await AsyncStorage.setItem("rollNo", student.rollNumber.toString());

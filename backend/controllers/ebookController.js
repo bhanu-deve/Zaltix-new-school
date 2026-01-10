@@ -14,7 +14,11 @@ const formatFileSize = (bytes) => {
 // CREATE ebook
 export const createEbook = async (req, res) => {
   try {
-    const { title, author, subject, class: bookClass } = req.body;
+    const { title, author, subject, class: bookClass, section } = req.body;
+
+    if (!section) {
+      return res.status(400).json({ error: "Section is required" });
+    }
 
     if (!req.files || !req.files["pdf"]) {
       return res.status(400).json({ error: "PDF file is required." });
@@ -28,6 +32,7 @@ export const createEbook = async (req, res) => {
       author,
       subject,
       class: bookClass,
+      section,
       fileSize: formatFileSize(pdfFile.size),
       pdfUrl: `/uploads/${pdfFile.filename}`,
       coverImageUrl: coverImageFile ? `/uploads/${coverImageFile.filename}` : null,
@@ -37,51 +42,61 @@ export const createEbook = async (req, res) => {
     res.status(201).json(newEbook);
 
   } catch (error) {
-    if (req.files) {
-      Object.values(req.files).forEach(files =>
-        files.forEach(file =>
-          fs.unlink(path.join('uploads', file.filename), () => {})
-        )
-      );
-    }
-    res.status(500).json({ error: error.message || "Server error" });
+    res.status(500).json({ error: error.message });
   }
 };
 
+
 // GET all ebooks
+// export const getEbooks = async (req, res) => {
+//   try {
+//     const { page = 1, limit = 10, search = '' } = req.query;
+//     const skip = (page - 1) * limit;
+//     const query = {};
+
+//     if (search) {
+//       query.$or = [
+//         { title: { $regex: search, $options: 'i' } },
+//         { author: { $regex: search, $options: 'i' } },
+//         { subject: { $regex: search, $options: 'i' } },
+//         { class: { $regex: search, $options: 'i' } },
+//       ];
+//     }
+
+//     const [ebooks, total] = await Promise.all([
+//       Ebook.find(query).sort({ uploadDate: -1 }).skip(+skip).limit(+limit),
+//       Ebook.countDocuments(query)
+//     ]);
+
+//     res.json({
+//       data: ebooks,
+//       meta: {
+//         total,
+//         page: +page,
+//         limit: +limit,
+//         totalPages: Math.ceil(total / limit)
+//       }
+//     });
+//   } catch {
+//     res.status(500).json({ error: "Failed to fetch ebooks" });
+//   }
+// };
 export const getEbooks = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '' } = req.query;
-    const skip = (page - 1) * limit;
+    const { class: className, section } = req.query;
+
     const query = {};
+    if (className) query.class = className;
+    if (section) query.section = section;
 
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { author: { $regex: search, $options: 'i' } },
-        { subject: { $regex: search, $options: 'i' } },
-        { class: { $regex: search, $options: 'i' } },
-      ];
-    }
+    const ebooks = await Ebook.find(query).sort({ uploadDate: -1 });
 
-    const [ebooks, total] = await Promise.all([
-      Ebook.find(query).sort({ uploadDate: -1 }).skip(+skip).limit(+limit),
-      Ebook.countDocuments(query)
-    ]);
-
-    res.json({
-      data: ebooks,
-      meta: {
-        total,
-        page: +page,
-        limit: +limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
+    res.json({ data: ebooks });
   } catch {
     res.status(500).json({ error: "Failed to fetch ebooks" });
   }
 };
+
 
 // GET ebook by ID
 export const getEbookById = async (req, res) => {
