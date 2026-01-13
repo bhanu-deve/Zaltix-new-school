@@ -68,7 +68,7 @@ const Index = () => {
         style={{ animationDelay: '0.4s' }}
       >
         <p className="text-gray-500 text-xs sm:text-sm">
-          © 2024 EduSphere. Transforming education through technology.
+          © 2026 Zaltixschool. Transforming education through technology.
         </p>
       </div>
     </div>

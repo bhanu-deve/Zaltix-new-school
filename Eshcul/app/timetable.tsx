@@ -406,6 +406,8 @@ export default function TimetableScreen() {
   // const section = 'A';
   const [className, setClassName] = useState('');
   const [section, setSection] = useState('');
+  const [subjects, setSubjects] = useState<any[]>([]);
+
 
 
   const periodTimeMap: { [key: number]: string } = {
@@ -417,7 +419,8 @@ export default function TimetableScreen() {
     5: '3:00 - 4:00',
   };
 
-  const days = t.days; // comes from language file
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+ // comes from language file
 
     useEffect(() => {
       const loadUser = async () => {
@@ -435,16 +438,38 @@ export default function TimetableScreen() {
       if (!className || !section) return;
 
       const fetchTimetable = async () => {
-        const res = await api.get(`/timetable/${className}`, {
-          params: { section }
-        });
-
-        setTimetable(res.data.data);
-        setLoading(false);
+        try {
+          const res = await api.get(`/timetable/${className}`, {
+            params: { section }
+          });
+          setTimetable(res.data.data);
+        } catch (e) {
+          setTimetable(null);
+        } finally {
+          setLoading(false);
+        }
       };
+
 
       fetchTimetable();
     }, [className, section]);
+    useEffect(() => {
+      if (!className || !section) return;
+
+      const fetchSubjects = async () => {
+        try {
+          const res = await api.get(`/timetable/subjects/${className}`, {
+            params: { section }
+          });
+          setSubjects(res.data.data);
+        } catch (err) {
+          setSubjects([]);
+        }
+      };
+
+      fetchSubjects();
+    }, [className, section]);
+
 
 
   if (loading) {
@@ -463,7 +488,17 @@ export default function TimetableScreen() {
     );
   }
 
-  const currentDayEntries = timetable.entries[selectedDay] || [];
+  // const currentDayEntries = timetable.entries[selectedDay] || [];
+  const entries =
+    timetable.entries instanceof Map
+      ? Object.fromEntries(timetable.entries)
+      : timetable.entries;
+
+  const currentDayEntries = entries[selectedDay] || [];
+  // 🔥 derive subjects from timetable entries
+  
+
+
 
   return (
     <LinearGradient
@@ -500,7 +535,7 @@ export default function TimetableScreen() {
           style={styles.daySelectorContainer}
           contentContainerStyle={styles.daySelectorContent}
         >
-          {days.map((day) => (
+          {days.map((day: string) => (
             <TouchableOpacity
               key={day}
               style={[
@@ -514,7 +549,8 @@ export default function TimetableScreen() {
                 styles.dayChipText,
                 selectedDay === day && styles.dayChipTextSelected
               ]}>
-                {day.slice(0,3)}
+                {t.days?.[days.indexOf(day)]?.slice(0,3) ?? day.slice(0,3)}
+
               </Text>
             </TouchableOpacity>
           ))}
@@ -539,52 +575,75 @@ export default function TimetableScreen() {
 
               </View>
               
-              {currentDayEntries.map((subject: string, index: number) => {
-                const teacher = timetable.subjects?.[subject]?.teacher || 'TBD';
+              {currentDayEntries.map((entry: string, index: number) => {
+                let subjectName = entry;
+                let teacherName = 'TBD';
+
+                // 🔥 SPLIT "Science - Hero"
+                if (entry.includes('-')) {
+                  const parts = entry.split('-').map(s => s.trim());
+                  subjectName = parts[0];
+                  teacherName = parts[1] || 'TBD';
+                }
+
                 return (
                   <View key={index} style={styles.tableRow}>
                     <View style={styles.periodCell}>
                       <Text style={styles.periodNumber}>
                         {t.periodShort} {index + 1}
                       </Text>
-
                     </View>
+
                     <View style={styles.timeCell}>
                       <Text style={styles.timeText}>{periodTimeMap[index]}</Text>
                     </View>
+
                     <View style={styles.subjectCell}>
                       <Text style={styles.subjectText}>
-                        {t.subjects[subject.toLowerCase()] ?? subject}
+                        {t.subjects?.[subjectName] ?? subjectName}
                       </Text>
 
-                      <Text style={styles.teacherText}>{teacher}</Text>
+                      <Text style={styles.teacherText}>
+                        {teacherName}
+                      </Text>
                     </View>
                   </View>
                 );
               })}
+
             </View>
           )}
         </View>
 
         {/* Compact Subjects Section */}
+        {/* Subjects Section (CLASS + SECTION ONLY) */}
         <View style={styles.subjectsSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t.subjectsTitle}</Text>
-
           </View>
 
-          {timetable.subjects && Object.keys(timetable.subjects).length > 0 ? (
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              style={styles.subjectsHorizontalScroll}
-            >
-              {Object.entries(timetable.subjects).map(([subjectName, subjectData]: [string, any]) => (
-                <View key={subjectName} style={styles.compactSubjectCard}>
-                  <View style={[styles.compactSubjectColor, { backgroundColor: getSubjectColor(subjectName) }]}>
-                    <Text style={styles.compactSubjectInitial}>{subjectName.charAt(0)}</Text>
+          {subjects.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {subjects.map((subj) => (
+                <View key={subj.name} style={styles.compactSubjectCard}>
+                  <View
+                    style={[
+                      styles.compactSubjectColor,
+                      { backgroundColor: getSubjectColor(subj.name) },
+                    ]}
+                  >
+                    <Text style={styles.compactSubjectInitial}>
+                      {subj.name.charAt(0)}
+                    </Text>
                   </View>
-                  <Text style={styles.compactSubjectName} numberOfLines={1}>{subjectName}</Text>
+
+                  <Text style={styles.compactSubjectName} numberOfLines={1}>
+                    {t.subjects?.[subj.name] ?? subj.name}
+                  </Text>
+
+                  <Text style={styles.teacherText}>
+                    {subj.teacher}
+                  </Text>
                 </View>
               ))}
             </ScrollView>
@@ -594,6 +653,8 @@ export default function TimetableScreen() {
             </View>
           )}
         </View>
+
+
       </ScrollView>
     </LinearGradient>
   );

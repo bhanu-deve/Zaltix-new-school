@@ -273,29 +273,47 @@ const TimetableView = () => {
   const [displaySchedule, setDisplaySchedule] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [classes, setClasses] = useState(['10A', '10B', '11A', '11B']);
-  const [teachers, setTeachers] = useState(['Ms. Rose', 'Mr. Smith', 'Dr. Johnson', 'Mr. Kumar', 'Ms. Watson', 'Coach Carter', 'Mrs. Lee', 'Mr. Charles', 'Ms. Gomez']);
+  // const [teachers, setTeachers] = useState(['Ms. Rose', 'Mr. Smith', 'Dr. Johnson', 'Mr. Kumar', 'Ms. Watson', 'Coach Carter', 'Mrs. Lee', 'Mr. Charles', 'Ms. Gomez']);
   const [newClassName, setNewClassName] = useState('');
   
   const timeSlots = ['9:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-1:00', '2:00-3:00', '3:00-4:00'];
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const subjects = [
-    'Math - Mr. Smith', 'English - Ms. Rose', 'Science - Dr. Johnson',
-    'History - Mrs. Lee', 'Geography - Mr. Kumar', 'Art - Ms. Gomez',
-    'Music - Mr. Charles', 'PE - Coach Carter', 'IT - Ms. Watson', 'Break'
-  ];
+  // const subjects = [
+  //   'Math - Mr. Smith', 'English - Ms. Rose', 'Science - Dr. Johnson',
+  //   'History - Mrs. Lee', 'Geography - Mr. Kumar', 'Art - Ms. Gomez',
+  //   'Music - Mr. Charles', 'PE - Coach Carter', 'IT - Ms. Watson', 'Break'
+  // ];
 
+  // const subjectColors = {
+  //   Math: 'bg-blue-100 text-blue-800',
+  //   English: 'bg-yellow-100 text-yellow-800',
+  //   Science: 'bg-purple-100 text-purple-800',
+  //   History: 'bg-green-100 text-green-800',
+  //   Geography: 'bg-pink-100 text-pink-800',
+  //   Art: 'bg-red-100 text-red-800',
+  //   Music: 'bg-indigo-100 text-indigo-800',
+  //   PE: 'bg-teal-100 text-teal-800',
+  //   IT: 'bg-orange-100 text-orange-800',
+  //   Break: 'bg-gray-200 text-gray-600',
+  // };
+  const [teachers, setTeachers] = useState<string[]>([]);
+  const [teacherSubjects, setTeacherSubjects] = useState<
+    { subject: string; teacher: string }[]
+  >([]);
   const subjectColors = {
-    Math: 'bg-blue-100 text-blue-800',
-    English: 'bg-yellow-100 text-yellow-800',
-    Science: 'bg-purple-100 text-purple-800',
-    History: 'bg-green-100 text-green-800',
-    Geography: 'bg-pink-100 text-pink-800',
-    Art: 'bg-red-100 text-red-800',
-    Music: 'bg-indigo-100 text-indigo-800',
-    PE: 'bg-teal-100 text-teal-800',
-    IT: 'bg-orange-100 text-orange-800',
-    Break: 'bg-gray-200 text-gray-600',
-  };
+  Math: 'bg-blue-100 text-blue-800',
+  English: 'bg-yellow-100 text-yellow-800',
+  Science: 'bg-purple-100 text-purple-800',
+  History: 'bg-green-100 text-green-800',
+  Geography: 'bg-pink-100 text-pink-800',
+  Art: 'bg-red-100 text-red-800',
+  Music: 'bg-indigo-100 text-indigo-800',
+  PE: 'bg-teal-100 text-teal-800',
+  IT: 'bg-orange-100 text-orange-800',
+  Break: 'bg-gray-200 text-gray-600',
+};
+
+
 
   const getColorClass = (slot) => {
     if (!slot || typeof slot !== 'string') return subjectColors['Break'];
@@ -379,28 +397,41 @@ const TimetableView = () => {
   // Fetch classes from API
   const fetchClasses = async () => {
     try {
-      const res = await api.get('/classes');
-      if (res.data?.classes) {
-        setClasses(res.data.classes.map(c => c.name));
-      }
+      const res = await api.get('/timetable'); // get all timetables
+      const classList = res.data.data.map((t: any) => t.className);
+      setClasses([...new Set(classList)]);
     } catch (err) {
       console.error('Error fetching classes:', err);
       toast.error('❌ Failed to fetch classes');
     }
   };
 
+
   // Fetch teachers from API
   const fetchTeachers = async () => {
     try {
-      const res = await api.get('/teachers');
-      if (res.data?.teachers) {
-        setTeachers(res.data.teachers.map(t => t.name));
-      }
-    } catch (err) {
-      console.error('Error fetching teachers:', err);
+      const res = await api.get('/Addstaff');
+
+      const onlyTeachers = res.data.filter(
+        (t: any) => t.role.toLowerCase().includes('teacher')
+      );
+
+      setTeachers(onlyTeachers.map((t: any) => t.name));
+
+      const mapping = onlyTeachers.flatMap((t: any) =>
+        t.subjects.map((sub: string) => ({
+          subject: sub,
+          teacher: t.name,
+        }))
+      );
+
+      setTeacherSubjects(mapping);
+    } catch {
       toast.error('❌ Failed to fetch teachers');
     }
   };
+
+
 
   // Handle subject change for editing
   const handleSubjectChange = (day, timeIndex, subject) => {
@@ -673,10 +704,11 @@ const TimetableView = () => {
                     disabled={isLoading}
                   >
                     <option value="">Select Teacher</option>
-                    {teachers.map(teacher => (
-                      <option key={teacher} value={teacher}>{teacher}</option>
+                    {teachers.map(t => (
+                      <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
+
                 </div>
               )}
             </div>
@@ -717,13 +749,17 @@ const TimetableView = () => {
                               <select
                                 value={displaySchedule[day]?.[timeIndex] || 'Break'}
                                 onChange={(e) => handleSubjectChange(day, timeIndex, e.target.value)}
-                                className="w-full p-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                disabled={isLoading}
+                                className="w-full p-2 border rounded text-sm"
                               >
-                                {subjects.map(subject => (
-                                  <option key={subject} value={subject}>{subject}</option>
+                                <option value="Break">Break</option>
+
+                                {teacherSubjects.map((t, i) => (
+                                  <option key={i} value={`${t.subject} - ${t.teacher}`}>
+                                    {t.subject} - {t.teacher}
+                                  </option>
                                 ))}
                               </select>
+
                             ) : (
                               <div className={`p-2 rounded text-center font-medium ${getColorClass(displaySchedule[day]?.[timeIndex])}`}>
                                 {displaySchedule[day]?.[timeIndex] || 'Break'}
