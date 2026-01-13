@@ -19,7 +19,7 @@ import Videos from "./routes/AddVideoRoute.js";
 import AddPayroll from "./routes/AddPayrollRoute.js";
 import AddFee from "./routes/AddFeeRoute.js";
 import AddAttendence from './routes/AddAttendenceRoute.js';
-import Timetable from "./routes/AddTimetableRoute.js";
+// import Timetable from "./routes/AddTimetableRoute.js";
 import AddBus from "./routes/AddbusRoute.js";
 import AddStudentBus from "./routes/AddStudentBusRoute.js";
 import StudentFeedback from './routes/AddStudentFeedbackRoute.js';
@@ -39,6 +39,7 @@ import DriverAuthRoute from "./routes/driverAuthRoute.js";
 
 import SubmitProjectRoute from "./routes/SubmitProjectRoute.js";
 import ProjectSubmissionRoute from "./routes/ProjectSubmissionRoute.js";
+import AddTimetableRoute from './routes/AddTimetableRoute.js';
 
 
 
@@ -110,6 +111,7 @@ app.use("/student-auth", studentAuthRoute);
 
 
 app.use("/report-subjects", ReportSubjectRoute);
+app.use('/timetable', AddTimetableRoute);
 
 
 
@@ -135,7 +137,7 @@ app.use('/videos', Videos);
 app.use("/payroll", AddPayroll);
 app.use("/fee", AddFee);
 app.use('/attendance', AddAttendence);
-app.use('/timetable', Timetable);
+// app.use('/timetable', Timetable);
 app.use("/addbus", AddBus);
 app.use('/addstudentbus', AddStudentBus);
 app.use('/studentfeedback', StudentFeedback);

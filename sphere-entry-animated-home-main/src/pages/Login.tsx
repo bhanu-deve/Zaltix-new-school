@@ -41,7 +41,13 @@ const Login = () => {
         password,
       });
 
+      localStorage.setItem("role", role);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      if (res.data.user.role === "teacher") {
+        localStorage.setItem("teacherName", res.data.user.name);
+      }
+
 
       toast.success("✅ Login successful!");
 

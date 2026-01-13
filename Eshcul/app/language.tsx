@@ -639,7 +639,14 @@ export const LanguageProvider = ({ children }: any) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, t: translations[lang], changeLanguage }}>
+    <LanguageContext.Provider
+      value={{
+        lang,
+        t: translations[lang] || translations.en,
+        changeLanguage
+      }}
+    >
+
       {children}
     </LanguageContext.Provider>
   );

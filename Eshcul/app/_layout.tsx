@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+
 import { ThemeProvider } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { useColorScheme } from '@/hooks/useColorScheme';
