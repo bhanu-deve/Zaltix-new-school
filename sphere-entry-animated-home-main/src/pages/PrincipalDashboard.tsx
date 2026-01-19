@@ -151,7 +151,7 @@
 // export default PrincipalDashboard;
 
 
-import React from 'react';
+// import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,9 +160,20 @@ import {
   Package, Bell, Trophy, MessageSquare, Bus
 } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import React, { useEffect } from 'react';
+
 
 const PrincipalDashboard = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    // 🔒 If first login, force change password
+    if (user?.firstLogin) {
+      navigate("/principal/change-password");
+    }
+  }, [navigate]);
+
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -253,7 +264,15 @@ const PrincipalDashboard = () => {
       icon: <Users className="w-6 h-6" />,
       path: '/dashboard/principal/students',
       gradient: 'bg-gradient-to-br from-sky-200 to-sky-300'
+    },
+    {
+      title: "Change Password",
+      description: "Update principal credentials",
+      icon: <Settings className="w-6 h-6" />,
+      path: "/principal/change-password",
+      gradient: "bg-gradient-to-br from-gray-200 to-gray-300"
     }
+
 
   ];
 
