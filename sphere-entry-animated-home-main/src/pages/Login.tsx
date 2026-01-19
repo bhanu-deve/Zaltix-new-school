@@ -52,7 +52,15 @@ const Login = () => {
       toast.success("✅ Login successful!");
 
       setTimeout(() => {
-        navigate(`/dashboard/${res.data.user.role}`);
+        // navigate(`/dashboard/${res.data.user.role}`);
+        // ✅ NEW
+        if (res.data.user.firstLogin) {
+          navigate("/principal/change-password");
+        } else {
+          navigate(`/dashboard/${res.data.user.role}`);
+        }
+
+
       }, 1000);
 
     } catch (err) {
@@ -136,6 +144,26 @@ const Login = () => {
                   required
                 />
               </div>
+              {role === "principal" && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/principal/forgot-password")}
+                  style={{ color: "blue", marginTop: "10px" }}
+                >
+                  Forgot Password?
+                </button>
+              )}
+              {role === "teacher" && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/teacher/forgot-password")}
+                  style={{ color: "blue", marginTop: "10px" }}
+                >
+                  Forgot Password?
+                </button>
+              )}
+
+
 
               {/* Submit Button */}
               <Button
@@ -149,13 +177,14 @@ const Login = () => {
             </form>
 
             {/* Demo Credentials */}
-            <div className="mt-6 text-center">
+            {/* <div className="mt-6 text-center">
               <div className="text-xs text-gray-500 bg-white/50 p-2 rounded">
                 <p><strong>Demo Credentials:</strong></p>
-                <p>{roleTitle}: {role}@edusphere.com</p>
-                <p>Password: {isPrincipal ? 'admin123' : 'teach123'}</p>
+                <p>Principal: principal@school.com</p>
+                <p>Password: admin123</p>
+
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>

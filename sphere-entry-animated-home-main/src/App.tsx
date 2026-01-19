@@ -128,6 +128,10 @@ import PrincipalAchievements from "./pages/principal/Achievements";
 import PrincipalFeedback from "./pages/principal/Feedback";
 import AddBus from './pages/principal/BusTracking'
 import PrincipalStudents from "./pages/principal/PrincipalStudents";
+import ChangePrincipalPassword from "./pages/ChangePrincipalPassword";
+import PrincipalForgotPassword from "./pages/PrincipalForgotPassword";
+import TeacherForgotPassword from "./pages/TeacherForgotPassword";
+import TeacherChangePassword from "./pages/teacher/ChangePassword";
 
 
 const queryClient = new QueryClient();
@@ -176,9 +180,28 @@ const App = () => (
             path="/dashboard/principal/students"
             element={<PrincipalStudents />}
           />
+          
+
+          <Route
+            path="/principal/forgot-password"
+            element={<PrincipalForgotPassword />}
+          />
 
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route
+            path="/principal/change-password"
+            element={<ChangePrincipalPassword />}
+          />
+          <Route
+            path="/teacher/forgot-password"
+            element={<TeacherForgotPassword />}
+          />
+          <Route
+            path="/dashboard/teacher/change-password"
+            element={<TeacherChangePassword />}
+          />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
