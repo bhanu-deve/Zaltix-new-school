@@ -88,44 +88,62 @@ import User from "../models/User.js";
 import { sendOTPEmail } from "../utils/mailer.js";
 
 /* ================= LOGIN ================= */
+// import bcrypt from "bcrypt";
+// import User from "../models/User.js";
+import { AddStaff } from "../models/AddStaff.js";
+
+/* ================= LOGIN ================= */
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // 🔹 CHECK IF PRINCIPAL EXISTS IN DB
-  const principal = await User.findOne({ role: "principal" });
-
-  // 🔹 FIRST PRINCIPAL LOGIN (HARDCODED)
-  if (!principal) {
-    if (
-      email === process.env.PRINCIPAL_EMAIL &&
-      password === process.env.PRINCIPAL_PASSWORD
-    ) {
-      return res.json({
-        user: { role: "principal", firstLogin: true }
-      });
+    // First principal login
+    const principalExists = await User.findOne({ role: "principal" });
+    if (!principalExists) {
+      if (
+        email === process.env.PRINCIPAL_EMAIL &&
+        password === process.env.PRINCIPAL_PASSWORD
+      ) {
+        return res.json({
+          user: { role: "principal", firstLogin: true }
+        });
+      }
     }
-  }
 
-  // 🔹 NORMAL LOGIN (TEACHER / PRINCIPAL)
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).json({ message: "Invalid credentials" });
-  }
-
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) {
-    return res.status(400).json({ message: "Invalid credentials" });
-  }
-
-  res.json({
-    user: {
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      staffId: user.staffId || null
+    // Normal login
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-  });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    let teacherName = null;
+
+    if (user.role === "teacher" && user.staffId) {
+      const staff = await AddStaff.findById(user.staffId).select("name");
+      teacherName = staff?.name || null;
+    }
+
+    return res.json({
+      user: {
+        _id: user._id,
+        email: user.email,
+        role: user.role,
+        staffId: user.staffId || null,
+        name: teacherName
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
 
 
 /* ================= CHANGE EMAIL + PASSWORD ================= */
