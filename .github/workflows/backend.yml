@@ -40,7 +40,6 @@ jobs:
 
     environment:
       name: production
-      url: ${{ secrets.APP_URL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -92,14 +91,11 @@ jobs:
             echo "🔐 Logging into GHCR"
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 
-            # Ensure env file exists
             touch .env
 
-            # Capture previous version
             PREVIOUS_TAG=$(grep "^IMAGE_TAG=" .env | cut -d '=' -f2 || true)
             echo "Previous version: $PREVIOUS_TAG"
 
-            # Update env for new deployment
             sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/" .env || echo "IMAGE_TAG=$IMAGE_TAG" >> .env
             sed -i "s|^IMAGE_NAME=.*|IMAGE_NAME=$IMAGE_NAME|" .env || echo "IMAGE_NAME=$IMAGE_NAME" >> .env
 
