@@ -44,6 +44,9 @@ import ProjectSubmissionRoute from "./routes/ProjectSubmissionRoute.js";
 import AddTimetableRoute from './routes/AddTimetableRoute.js';
 
 
+import staffRoutes from './routes/staffRoutes.js';
+
+
 
 
 
@@ -111,6 +114,8 @@ app.use('/uploads/achievements', express.static(path.join(process.cwd(), 'upload
 app.use("/api/auth", AuthRoute);
 
 app.use("/student-auth", studentAuthRoute);
+
+app.use('/staff', staffRoutes);
 
 
 app.use("/report-subjects", ReportSubjectRoute);

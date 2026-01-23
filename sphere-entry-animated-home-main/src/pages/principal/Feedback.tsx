@@ -28,10 +28,14 @@ type StudentFeedbackType = {
   _id: string;
   type: 'Student';
   studentName?: string;
+  className?: string;
+  teacherName?: string;
+  teacherRole?: string;
   feedback?: string;
   rating?: number;
-  date?: string;
+  createdAt?: string;
 };
+
 
 type FeedbackType = TeacherFeedbackType | StudentFeedbackType;
 
@@ -188,6 +192,8 @@ const Feedback = () => {
                     ) : (
                       <>
                         <TableHead>Student Name</TableHead>
+                        <TableHead>Class</TableHead>
+                        <TableHead>Teacher</TableHead>
                         <TableHead>Rating</TableHead>
                         <TableHead>Feedback</TableHead>
                         <TableHead>Date</TableHead>
@@ -243,27 +249,40 @@ const Feedback = () => {
                             <TableCell>
                               {(f as StudentFeedbackType).studentName || 'N/A'}
                             </TableCell>
+
+                            <TableCell>
+                              {(f as StudentFeedbackType).className || '-'}
+                            </TableCell>
+
+                            <TableCell>
+                              {(f as StudentFeedbackType).teacherName || '-'}
+                              <div className="text-xs text-gray-500">
+                                {(f as StudentFeedbackType).teacherRole || ''}
+                              </div>
+                            </TableCell>
+
                             <TableCell>
                               <div className="flex items-center space-x-1">
                                 {renderStars(f.rating)}
-                                <span
-                                  className={`ml-2 font-medium ${getRatingColor(
-                                    f.rating
-                                  )}`}
-                                >
+                                <span className={`ml-2 font-medium ${getRatingColor(f.rating)}`}>
                                   {f.rating ?? 0}/5
                                 </span>
                               </div>
                             </TableCell>
+
                             <TableCell className="max-w-xs truncate">
                               {f.feedback || '-'}
                             </TableCell>
+
                             <TableCell>
-                              {f.date
-                                ? new Date(f.date).toLocaleDateString()
+                              {(f as StudentFeedbackType).createdAt
+                                ? new Date(
+                                    (f as StudentFeedbackType).createdAt!
+                                  ).toLocaleDateString()
                                 : '-'}
                             </TableCell>
                           </>
+
                         )}
                       </TableRow>
                     ))
