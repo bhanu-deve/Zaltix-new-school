@@ -25,7 +25,7 @@ COPY --chown=nodejs:nodejs package*.json ./
 # Copy node_modules from builder
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
-# Copy application code last (changes most frequently)
+# Copy 
 COPY --chown=nodejs:nodejs . .
 
 # Switch to non-root user
