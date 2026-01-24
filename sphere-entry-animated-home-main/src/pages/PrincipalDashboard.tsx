@@ -167,6 +167,17 @@ const PrincipalDashboard = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+     // ❌ No login
+      if (!user) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      // ❌ Logged in but not principal
+      if (user.role !== "principal") {
+        navigate(`/dashboard/${user.role}`, { replace: true });
+        return;
+      }
 
     // 🔒 If first login, force change password
     if (user?.firstLogin) {
