@@ -97,7 +97,7 @@
 // export default TeacherDashboard;
 
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -122,6 +122,23 @@ import { Lock } from "lucide-react";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
+
+    useEffect(() => {
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+
+      // ❌ Not logged in
+      if (!user) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      // ❌ Logged in but not teacher
+      if (user.role !== "teacher") {
+        navigate(`/dashboard/${user.role}`, { replace: true });
+        return;
+      }
+    }, [navigate]);
+
 
   const handleLogout = () => {
     localStorage.removeItem('user');
