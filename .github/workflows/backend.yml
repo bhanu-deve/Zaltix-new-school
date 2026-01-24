@@ -9,7 +9,6 @@ on:
 env:
   NODE_VERSION: 18
   REGISTRY: ghcr.io
-  # 🔥 FORCE LOWERCASE IMAGE NAME
   IMAGE_NAME: bhanu-deve/zaltix-new-school/backend
 
 permissions:
@@ -123,7 +122,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ✅ Non-blocking image scan
       - name: Trivy Image Scan (non-blocking)
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.20.0
@@ -149,20 +147,20 @@ jobs:
         with:
           sarif_file: trivy-image.sarif
 
-      - name: Deploy to Azure VM (health check + rollback)
+      # 🔥 FIXED DEPLOY STEP (Docker health-based)
+      - name: Deploy to Azure VM (docker health-based)
         uses: appleboy/ssh-action@v1.0.3
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USERNAME: ${{ github.actor }}
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_NAME: ghcr.io/${{ env.IMAGE_NAME }}
-          APP_PORT: 3000
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
           port: 22
-          envs: GHCR_TOKEN,GHCR_USERNAME,IMAGE_TAG,IMAGE_NAME,APP_PORT
+          envs: GHCR_TOKEN,GHCR_USERNAME,IMAGE_TAG,IMAGE_NAME
           script: |
             set -e
             cd /opt/zaltix/backend
@@ -178,14 +176,21 @@ jobs:
             docker compose pull
             docker compose up -d --remove-orphans --no-build
 
-            for i in {1..12}; do
-              if curl -sf http://localhost:$APP_PORT/health > /dev/null; then
+            echo "⏳ Waiting for Docker health status..."
+            for i in {1..36}; do
+              STATUS=$(docker inspect -f '{{.State.Health.Status}}' zaltix-backend 2>/dev/null || echo "starting")
+              echo "Health: $STATUS"
+
+              if [ "$STATUS" = "healthy" ]; then
+                echo "✅ Service healthy"
                 docker image prune -af --filter "until=72h"
                 exit 0
               fi
+
               sleep 5
             done
 
+            echo "❌ Health check failed — rolling back"
             if [ -n "$PREVIOUS_TAG" ]; then
               sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$PREVIOUS_TAG/" .env
               docker compose pull
