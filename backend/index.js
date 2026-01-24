@@ -107,6 +107,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ ADD HEALTH CHECK HERE
+app.get("/health", async (req, res) => {
+  const dbState = Db.readyState === 1 ? "Connected" : "Disconnected";
+
+  if (dbState !== "Connected") {
+    return res.status(500).json({ status: "DOWN", database: dbState });
+  }
+
+  res.status(200).json({
+    status: "UP",
+    server: "Running",
+    database: dbState,
+    uptime: process.uptime(),
+    timestamp: new Date(),
+  });
+});
+
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/uploads/achievements', express.static(path.join(process.cwd(), 'uploads/achievements')));
 
