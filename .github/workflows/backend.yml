@@ -9,7 +9,8 @@ on:
 env:
   NODE_VERSION: 18
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/backend
+  # 🔥 FORCE LOWERCASE IMAGE NAME
+  IMAGE_NAME: bhanu-deve/zaltix-new-school/backend
 
 permissions:
   contents: read
@@ -124,7 +125,6 @@ jobs:
 
       # ✅ Non-blocking image scan
       - name: Trivy Image Scan (non-blocking)
-        id: trivy_image
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.20.0
         with:
@@ -133,7 +133,6 @@ jobs:
           format: sarif
           output: trivy-image.sarif
 
-      # ✅ Check if SARIF exists
       - name: Check Trivy Image SARIF
         id: trivy_sarif
         if: always()
@@ -144,7 +143,6 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      # ✅ Upload only if file exists
       - name: Upload Trivy Image results
         if: steps.trivy_sarif.outputs.exists == 'true'
         uses: github/codeql-action/upload-sarif@v3
@@ -177,8 +175,8 @@ jobs:
             sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/" .env || echo "IMAGE_TAG=$IMAGE_TAG" >> .env
             sed -i "s|^IMAGE_NAME=.*|IMAGE_NAME=$IMAGE_NAME|" .env || echo "IMAGE_NAME=$IMAGE_NAME" >> .env
 
-            docker-compose pull
-            docker-compose up -d --remove-orphans --no-build
+            docker compose pull
+            docker compose up -d --remove-orphans --no-build
 
             for i in {1..12}; do
               if curl -sf http://localhost:$APP_PORT/health > /dev/null; then
@@ -190,8 +188,8 @@ jobs:
 
             if [ -n "$PREVIOUS_TAG" ]; then
               sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$PREVIOUS_TAG/" .env
-              docker-compose pull
-              docker-compose up -d --no-build
+              docker compose pull
+              docker compose up -d --no-build
             fi
 
             exit 1
