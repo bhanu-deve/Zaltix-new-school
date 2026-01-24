@@ -12,7 +12,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}/backend
   DEPLOY_TIMEOUT: 600
 
-# 🔐 REQUIRED for Trivy SARIF upload
 permissions:
   contents: read
   packages: write
@@ -47,7 +46,6 @@ jobs:
             echo "⚠️ No lint script found, skipping"
           fi
 
-      # ✅ FIXED TEST STEP (no more "no test specified" failure)
       - name: Test
         working-directory: backend
         run: |
@@ -66,17 +64,6 @@ jobs:
           else
             echo "⚠️ No build script found, skipping"
           fi
-
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: |
-            backend/dist
-            backend/build
-          retention-days: 7
-          if-no-files-found: ignore
 
   security:
     name: Security Scan (Filesystem)
@@ -143,10 +130,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # ✅ FIXED: Scan `latest` tag to avoid GHCR race condition
       - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image-ref: ghcr.io/${{ env.IMAGE_NAME }}:latest
           severity: CRITICAL,HIGH
           exit-code: 0
           format: sarif
