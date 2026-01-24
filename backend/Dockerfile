@@ -1,32 +1,34 @@
-FROM node:18-alpine AS builder
+# ---------- Dependencies stage ----------
+FROM node:18-alpine AS deps
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && \
-    npm cache clean --force
+# Install production dependencies
+RUN npm ci --only=production && npm cache clean --force
 
-# Production stage
+
+# ---------- Runtime stage ----------
 FROM node:18-alpine
 WORKDIR /app
 
-# Set environment variable early
+# Environment
 ENV NODE_ENV=production
+ENV PORT=3000
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy package files first (better caching)
-COPY --chown=nodejs:nodejs package*.json ./
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
 
-# Copy node_modules from builder
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+# Copy application source
+COPY . .
 
-# Copy 
-COPY --chown=nodejs:nodejs . .
+# Fix ownership
+RUN chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs
@@ -34,9 +36,5 @@ USER nodejs
 # Expose port
 EXPOSE 3000
 
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
-
-# Start application
+# 🚀 Start application ONLY
 CMD ["node", "index.js"]
