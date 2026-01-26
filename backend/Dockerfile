@@ -13,7 +13,7 @@ RUN npm ci --only=production && npm cache clean --force
 FROM node:18-alpine
 WORKDIR /app
 
-# Environment
+
 ENV NODE_ENV=production
 ENV PORT=3000
 
