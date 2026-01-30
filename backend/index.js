@@ -36,7 +36,6 @@ import ProjectSubmissionRoute from "./routes/ProjectSubmissionRoute.js";
 import AddTimetableRoute from './routes/AddTimetableRoute.js';
 import staffRoutes from './routes/staffRoutes.js';
 
-<<<<<<< HEAD
 import feeManagementRoutes from "./routes/feeManagementRoutes.js";
 
 
@@ -47,8 +46,6 @@ import feeManagementRoutes from "./routes/feeManagementRoutes.js";
 
 
 
-=======
->>>>>>> c3aeba3dd2d3c70c8efa69940f2b86ce216143d8
 import { Db } from './config/db.js';
 
 const app = express();
