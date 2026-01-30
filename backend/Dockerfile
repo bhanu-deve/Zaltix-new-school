@@ -5,7 +5,6 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies
 RUN npm ci --only=production && npm cache clean --force
 
 
@@ -13,6 +12,8 @@ RUN npm ci --only=production && npm cache clean --force
 FROM node:18-alpine
 WORKDIR /app
 
+# 🔴 ADD THIS LINE (FIX)
+RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -24,7 +25,7 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy application source
+# Copy app source
 COPY . .
 
 # Fix ownership
@@ -36,5 +37,5 @@ USER nodejs
 # Expose port
 EXPOSE 3000
 
-# 🚀 Start application ONLY
+# Start application
 CMD ["node", "index.js"]

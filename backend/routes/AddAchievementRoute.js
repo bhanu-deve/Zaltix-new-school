@@ -1,5 +1,5 @@
 import express from 'express';
-import uploadAchievement from '../Middlewares/AchieveUpload.js';
+import uploadAchievement from '../middlewares/AchieveUpload.js';
 import {
   createAchievement,
   getAchievements,

@@ -1,17 +1,21 @@
-version: '3.8'
-
 services:
   backend:
-    image: ${IMAGE_NAME}:${IMAGE_TAG:-latest}
+    image: ghcr.io/bhanu-deve/zaltix-new-school/backend:latest
     container_name: zaltix-backend
     restart: unless-stopped
+
     ports:
       - "3000:3000"
+
+    env_file:
+      - .env
+
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      NODE_ENV: production
+      PORT: 3000
+
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:3000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
