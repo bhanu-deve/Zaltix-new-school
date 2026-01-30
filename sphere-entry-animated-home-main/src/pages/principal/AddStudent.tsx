@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, UserPlus, Calendar, Eye, EyeOff, Copy } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import api from "@/api/api";
+
 
 interface StudentFormData {
   firstName: string;
@@ -151,7 +152,7 @@ const AddStudent: React.FC = () => {
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              onClick={() => navigate('/dashboard/teacher')}
+              onClick={() => navigate('/dashboard/principal')}
               className="flex items-center"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -412,7 +413,8 @@ const AddStudent: React.FC = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate('/dashboard/teacher')}
+                    onClick={() => navigate('/dashboard/principal')
+}
                   >
                     Cancel
                   </Button>

@@ -1,216 +1,13 @@
-// import React from 'react';
-// import { View, StyleSheet, FlatList, Text, Alert } from 'react-native';
-// import { Card, Title, Paragraph, Button } from 'react-native-paper';
-// import * as Print from 'expo-print';
-// import * as FileSystem from 'expo-file-system/legacy';
-// import * as Sharing from 'expo-sharing';
-// import Toast from 'react-native-toast-message';
-
-// interface FeeRecord {
-//   id: string;
-//   label: string;
-//   amount: number;
-//   dueDate: string;
-//   status: 'Paid' | 'Unpaid';
-// }
-
-// const termWiseData: FeeRecord[] = [
-//   { id: '1', label: 'Term 1', amount: 15000, dueDate: '2025-06-01', status: 'Paid' },
-//   { id: '2', label: 'Term 2', amount: 15000, dueDate: '2025-09-01', status: 'Unpaid' },
-//   { id: '3', label: 'Term 3', amount: 15000, dueDate: '2025-12-01', status: 'Unpaid' },
-// ];
-
-// const FeeScreen = () => {
-//   const generateInvoiceHTML = (item: FeeRecord) => `
-//     <html>
-//       <head>
-//         <style>
-//           body { font-family: Arial; padding: 20px; }
-//           h1 { color: #444; }
-//           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-//           th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-//         </style>
-//       </head>
-//       <body>
-//         <h1>Invoice - ${item.label}</h1>
-//         <table>
-//           <tr><th>Term</th><td>${item.label}</td></tr>
-//           <tr><th>Amount</th><td>₹${item.amount}</td></tr>
-//           <tr><th>Due Date</th><td>${item.dueDate}</td></tr>
-//           <tr><th>Status</th><td>${item.status}</td></tr>
-//           <tr><th>Remaining</th><td>₹${item.status === 'Paid' ? 0 : item.amount}</td></tr>
-//         </table>
-//       </body>
-//     </html>
-//   `;
-
-//   const handleDownloadInvoice = async (item: FeeRecord) => {
-//     try {
-//       const html = generateInvoiceHTML(item);
-//       const { uri } = await Print.printToFileAsync({ html });
-
-//       const newPath = `${FileSystem.documentDirectory}Invoice_${item.label.replace(
-//         ' ',
-//         '_'
-//       )}.pdf`;
-
-//       await FileSystem.moveAsync({ from: uri, to: newPath });
-
-//       if (await Sharing.isAvailableAsync()) {
-//         await Sharing.shareAsync(newPath);
-//       } else {
-//         Alert.alert('Saved', 'Invoice saved successfully');
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       Alert.alert('Error', 'Failed to generate or save invoice');
-//     }
-//   };
-
-//   const handlePayment = (item: FeeRecord) => {
-//     Toast.show({
-//       type: 'success',
-//       text1: 'Payment Successful',
-//       text2: `${item.label} fee has been paid 🎉`,
-//     });
-//   };
-
-//   const renderCard = ({ item }: { item: FeeRecord }) => {
-//     const remainingAmount = item.status === 'Paid' ? 0 : item.amount;
-
-//     return (
-//       <Card style={[styles.card, item.status === 'Paid' ? styles.paid : styles.unpaid]}>
-//         <Card.Content>
-//           <View style={styles.headerRow}>
-//             <Title style={styles.title}>{item.label}</Title>
-//             <Text style={item.status === 'Paid' ? styles.badgePaid : styles.badgeUnpaid}>
-//               {item.status}
-//             </Text>
-//           </View>
-
-//           <Paragraph style={styles.paragraph}>💰 Amount: ₹{item.amount}</Paragraph>
-//           <Paragraph style={styles.paragraph}>📅 Due Date: {item.dueDate}</Paragraph>
-//           <Paragraph style={styles.remaining}>
-//             Remaining Amount: ₹{remainingAmount}
-//           </Paragraph>
-//         </Card.Content>
-
-//         <Card.Actions style={styles.actions}>
-//           <Button onPress={() => handleDownloadInvoice(item)}>
-//             Download Invoice
-//           </Button>
-//           {item.status === 'Unpaid' && (
-//             <Button
-//               mode="contained"
-//               buttonColor="#2575fc"
-//               textColor="#fff"
-//               onPress={() => handlePayment(item)}
-//             >
-//               Pay Now
-//             </Button>
-//           )}
-//         </Card.Actions>
-//       </Card>
-//     );
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.screenTitle}>📘 Fee Details</Text>
-//       <FlatList
-//         data={termWiseData}
-//         keyExtractor={(item) => item.id}
-//         renderItem={renderCard}
-//         contentContainerStyle={styles.listContainer}
-//       />
-//       <Toast />
-//     </View>
-//   );
-// };
-
-// export default FeeScreen;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#f5f7fa',
-//   },
-//   screenTitle: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     color: '#2575fc',
-//     textAlign: 'center',
-//     marginBottom: 12,
-//   },
-//   listContainer: {
-//     paddingBottom: 16,
-//   },
-//   card: {
-//     marginVertical: 8,
-//     borderRadius: 16,
-//     elevation: 3,
-//   },
-//   paid: {
-//     backgroundColor: '#e0ffe6',
-//   },
-//   unpaid: {
-//     backgroundColor: '#ffe0e0',
-//   },
-//   headerRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//   },
-//   badgePaid: {
-//     backgroundColor: 'green',
-//     color: 'white',
-//     fontWeight: 'bold',
-//     paddingHorizontal: 10,
-//     paddingVertical: 4,
-//     borderRadius: 12,
-//     fontSize: 12,
-//   },
-//   badgeUnpaid: {
-//     backgroundColor: 'red',
-//     color: 'white',
-//     fontWeight: 'bold',
-//     paddingHorizontal: 10,
-//     paddingVertical: 4,
-//     borderRadius: 12,
-//     fontSize: 12,
-//   },
-//   title: {
-//     fontSize: 20,
-//     fontWeight: '600',
-//   },
-//   paragraph: {
-//     fontSize: 15,
-//     marginTop: 4,
-//     color: '#333',
-//   },
-//   remaining: {
-//     fontSize: 16,
-//     marginTop: 6,
-//     fontWeight: '600',
-//     color: '#444',
-//   },
-//   actions: {
-//     justifyContent: 'space-between',
-//     paddingHorizontal: 8,
-//     paddingBottom: 12,
-//   },
-// });
-
-import React from 'react';
+import { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList, Text, Alert } from 'react-native';
-import { Card, Title, Paragraph, Button } from 'react-native-paper';
+import { Card, Button } from 'react-native-paper';
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import Toast from 'react-native-toast-message';
 import { useLang } from './language';
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../api/api";
 
 interface FeeRecord {
   id: string;
@@ -221,14 +18,44 @@ interface FeeRecord {
   status: 'Paid' | 'Unpaid' | 'Partial';
 }
 
-const termWiseData: FeeRecord[] = [
-  { id: '1', label: 'Term 1', amount: 15000, paidAmount: 15000, dueDate: '2025-06-01', status: 'Paid' },
-  { id: '2', label: 'Term 2', amount: 15000, paidAmount: 5000, dueDate: '2025-09-01', status: 'Partial' },
-  { id: '3', label: 'Term 3', amount: 15000, paidAmount: 0, dueDate: '2025-12-01', status: 'Unpaid' },
-];
-
 const FeeScreen = () => {
   const { t } = useLang();
+  const [fees, setFees] = useState<FeeRecord[]>([]);
+
+  useEffect(() => {
+    loadFees();
+  }, []);
+
+  const loadFees = async () => {
+    try {
+      const rollNo = await AsyncStorage.getItem("rollNo");
+      const className = await AsyncStorage.getItem("className");
+
+      if (!rollNo || !className) return;
+
+      const res = await api.get("/api/fees/my-fees", {
+        params: { rollNo, className }
+      });
+
+      const mapped = res.data.map((f: any, index: number) => ({
+        id: `${index}`,
+        label: f.feeType,
+        amount: f.amount,
+        paidAmount: f.paidAmount,
+        dueDate: f.dueDate,
+        status:
+          f.paidAmount === f.amount
+            ? "Paid"
+            : f.paidAmount > 0
+            ? "Partial"
+            : "Unpaid"
+      }));
+
+      setFees(mapped);
+    } catch (error) {
+      console.error("Failed to load fees", error);
+    }
+  };
 
   const generateInvoiceHTML = (item: FeeRecord) => `
     <html>
@@ -270,7 +97,6 @@ const FeeScreen = () => {
     } catch (error) {
       console.error(error);
       Alert.alert(t.error, t.invoiceFailed);
-
     }
   };
 
@@ -282,6 +108,10 @@ const FeeScreen = () => {
     });
   };
 
+  const totalFees = fees.reduce((sum, item) => sum + item.amount, 0);
+  const totalPaid = fees.reduce((sum, item) => sum + item.paidAmount, 0);
+  const termsPaid = fees.filter(item => item.status === 'Paid').length;
+
   const renderCard = ({ item }: { item: FeeRecord }) => {
     const remainingAmount = item.amount - item.paidAmount;
     const isPaid = remainingAmount === 0;
@@ -289,7 +119,7 @@ const FeeScreen = () => {
 
     return (
       <Card style={[
-        styles.card, 
+        styles.card,
         isPaid ? styles.paidCard : isPartial ? styles.partialCard : styles.unpaidCard
       ]}>
         <Card.Content style={styles.cardContent}>
@@ -304,7 +134,7 @@ const FeeScreen = () => {
               </View>
             </View>
             <View style={[
-              styles.statusBadge, 
+              styles.statusBadge,
               isPaid ? styles.paidBadge : isPartial ? styles.partialBadge : styles.unpaidBadge
             ]}>
               <Text style={styles.badgeText}>{item.status}</Text>
@@ -315,28 +145,17 @@ const FeeScreen = () => {
 
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>💰 {t.totalAmount}:</Text>
-              </View>
+              <Text style={styles.detailLabel}>💰 {t.totalAmount}:</Text>
               <Text style={styles.detailValue}>₹{item.amount.toLocaleString()}</Text>
             </View>
-            
+
             <View style={styles.detailRow}>
-              <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>✅ {t.paidAmount}:</Text>
-              </View>
-              <Text style={[
-                styles.detailValue,
-                item.paidAmount > 0 ? styles.paidAmountText : styles.unpaidAmountText
-              ]}>
-                ₹{item.paidAmount.toLocaleString()}
-              </Text>
+              <Text style={styles.detailLabel}>✅ {t.paidAmount}:</Text>
+              <Text style={styles.detailValue}>₹{item.paidAmount.toLocaleString()}</Text>
             </View>
-            
+
             <View style={styles.detailRow}>
-              <View style={styles.detailLabelContainer}>
-                <Text style={styles.detailLabel}>⚖️ {t.remaining}:</Text>
-              </View>
+              <Text style={styles.detailLabel}>⚖️ {t.remaining}:</Text>
               <Text style={[
                 styles.remainingAmount,
                 remainingAmount === 0 ? styles.paidAmount : styles.unpaidAmount
@@ -348,7 +167,7 @@ const FeeScreen = () => {
         </Card.Content>
 
         <Card.Actions style={styles.actions}>
-          <Button 
+          <Button
             mode="outlined"
             style={styles.invoiceButton}
             labelStyle={styles.invoiceButtonText}
@@ -356,6 +175,7 @@ const FeeScreen = () => {
           >
             📄 {t.invoice}
           </Button>
+
           {!isPaid && (
             <Button
               mode="contained"
@@ -371,10 +191,6 @@ const FeeScreen = () => {
     );
   };
 
-  const totalFees = termWiseData.reduce((sum, item) => sum + item.amount, 0);
-  const totalPaid = termWiseData.reduce((sum, item) => sum + item.paidAmount, 0);
-  const termsPaid = termWiseData.filter(item => item.status === 'Paid').length;
-
   return (
     <View style={styles.container}>
       <View style={styles.statsContainer}>
@@ -387,25 +203,26 @@ const FeeScreen = () => {
           <Text style={styles.statLabel}>{t.paidAmount}</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{termsPaid}/{termWiseData.length}</Text>
+          <Text style={styles.statValue}>{termsPaid}/{fees.length}</Text>
           <Text style={styles.statLabel}>{t.termsPaid}</Text>
         </View>
       </View>
 
       <FlatList
-        data={termWiseData}
+        data={fees}
         keyExtractor={(item) => item.id}
         renderItem={renderCard}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        numColumns={1}
       />
+
       <Toast />
     </View>
   );
 };
 
 export default FeeScreen;
+
 
 const styles = StyleSheet.create({
   container: {
@@ -629,3 +446,4 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
 });
+

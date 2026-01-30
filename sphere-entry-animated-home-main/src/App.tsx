@@ -113,7 +113,7 @@ import Achievements from "./pages/teacher/Achievements";
 import Notifications from "./pages/teacher/Notifications";
 import Bus from "./pages/teacher/Bus";
 import Feedback from "./pages/teacher/Feedback";
-import AddStudent from "./pages/teacher/AddStudent"; // Import the new component
+// import AddStudent from "./pages/principal/AddStudent"; // Import the new component
 
 // Principal module imports
 import AttendanceAnalytics from "./pages/principal/Attendance";
@@ -133,6 +133,8 @@ import PrincipalForgotPassword from "./pages/PrincipalForgotPassword";
 import TeacherForgotPassword from "./pages/TeacherForgotPassword";
 import TeacherChangePassword from "./pages/teacher/ChangePassword";
 import RequireAuth from "./routes/RequireAuth";
+import AddStudent from "./pages/principal/AddStudent";
+
 
 
 const queryClient = new QueryClient();
@@ -284,14 +286,14 @@ const App = () => (
           />
 
           {/* <Route path="/dashboard/teacher/add-student" element={<AddStudent />} /> */}
-          <Route
+          {/* <Route
             path="/dashboard/teacher/add-student"
             element={
               <RequireAuth role="teacher">
                 <AddStudent />
               </RequireAuth>
             }
-          />
+          /> */}
           
           {/* Principal Module Routes */}
           {/* <Route path="/dashboard/principal/attendance" element={<AttendanceAnalytics />} /> */}
@@ -416,6 +418,15 @@ const App = () => (
               
             }
           />
+          <Route
+            path="/dashboard/principal/add-student"
+            element={
+              <RequireAuth role="principal">
+                <AddStudent />
+              </RequireAuth>
+            }
+          />
+
           
 
           <Route

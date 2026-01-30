@@ -91,6 +91,7 @@ import { sendOTPEmail } from "../utils/mailer.js";
 // import bcrypt from "bcrypt";
 // import User from "../models/User.js";
 import { AddStaff } from "../models/AddStaff.js";
+import jwt from "jsonwebtoken";
 
 /* ================= LOGIN ================= */
 export const login = async (req, res) => {
@@ -257,4 +258,106 @@ export const teacherChangePassword = async (req, res) => {
   await user.save();
 
   res.json({ message: "Password changed successfully" });
+};
+
+
+
+
+
+
+
+
+export const refreshAccessToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token required" });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET
+    );
+
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    const newAccessToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRE }
+    );
+
+    res.json({ accessToken: newAccessToken });
+
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+
+
+export const mobileLogin = async (req, res) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    // 🔐 Teacher only
+    const user = await User.findOne({ email, role: "teacher" });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    let teacherName = null;
+    if (user.staffId) {
+      const staff = await AddStaff.findById(user.staffId).select("name");
+      teacherName = staff?.name || null;
+    }
+
+    // 🔐 ACCESS TOKEN (short)
+    const accessToken = jwt.sign(
+      { id: user._id, role: "teacher" },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRE }
+    );
+
+    // 🔐 REFRESH TOKEN (long)
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRE }
+    );
+
+    // (optional but recommended)
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return res.json({
+      accessToken,
+      refreshToken,
+      user: {
+        _id: user._id,
+        email: user.email,
+        role: "teacher",
+        staffId: user.staffId,
+        name: teacherName
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };

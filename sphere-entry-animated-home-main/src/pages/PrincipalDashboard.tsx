@@ -161,6 +161,8 @@ import {
 } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import React, { useEffect } from 'react';
+import { UserPlus } from 'lucide-react';
+
 
 
 const PrincipalDashboard = () => {
@@ -262,6 +264,14 @@ const PrincipalDashboard = () => {
       path: '/dashboard/principal/inventory',
       gradient: 'bg-gradient-to-br from-teal-200 to-teal-300'
     },
+    {
+      title: 'Add Student',
+      description: 'Register new students',
+      icon: <UserPlus className="w-6 h-6" />,
+      path: '/dashboard/principal/add-student',
+      gradient: 'bg-gradient-to-br from-rose-200 to-rose-300'
+    },
+
     {
       title: 'Bus Tracking',
       description: 'Route monitoring & info',

@@ -159,7 +159,7 @@ const TeacherDashboard = () => {
     { title: 'Achievements', description: 'Record student achievements', icon: <Trophy className="w-6 h-6" />, path: '/dashboard/teacher/achievements', gradient: 'bg-gradient-to-br from-yellow-200 to-yellow-300' },
     { title: 'Bus Tracking', description: 'Monitor bus routes', icon: <Bus className="w-6 h-6" />, path: '/dashboard/teacher/bus', gradient: 'bg-gradient-to-br from-emerald-200 to-emerald-300' },
     { title: 'Feedback', description: 'Submit student feedback', icon: <MessageSquare className="w-6 h-6" />, path: '/dashboard/teacher/feedback', gradient: 'bg-gradient-to-br from-purple-200 to-purple-300' },
-    { title: 'Add Student', description: 'Register new students', icon: <UserPlus className="w-6 h-6" />, path: '/dashboard/teacher/add-student', gradient: 'bg-gradient-to-br from-rose-200 to-rose-300' },
+    // { title: 'Add Student', description: 'Register new students', icon: <UserPlus className="w-6 h-6" />, path: '/dashboard/teacher/add-student', gradient: 'bg-gradient-to-br from-rose-200 to-rose-300' },
     {
       title: "Change Password",
       description: "Update your login password",

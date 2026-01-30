@@ -17,7 +17,6 @@ import AchievementRoutes from "./routes/AddAchievementRoute.js";
 import AddGrade from "./routes/AddGradeRoute.js";
 import Videos from "./routes/AddVideoRoute.js";
 import AddPayroll from "./routes/AddPayrollRoute.js";
-import AddFee from "./routes/AddFeeRoute.js";
 import AddAttendence from './routes/AddAttendenceRoute.js';
 // import Timetable from "./routes/AddTimetableRoute.js";
 import AddBus from "./routes/AddbusRoute.js";
@@ -45,6 +44,9 @@ import AddTimetableRoute from './routes/AddTimetableRoute.js';
 
 
 import staffRoutes from './routes/staffRoutes.js';
+
+import feeManagementRoutes from "./routes/feeManagementRoutes.js";
+
 
 
 
@@ -138,6 +140,9 @@ app.use('/staff', staffRoutes);
 app.use("/report-subjects", ReportSubjectRoute);
 app.use('/timetable', AddTimetableRoute);
 
+app.use("/api/fees", feeManagementRoutes);
+
+
 
 
 
@@ -160,7 +165,6 @@ app.use('/achievements', AchievementRoutes);
 app.use('/grades', AddGrade);
 app.use('/videos', Videos);
 app.use("/payroll", AddPayroll);
-app.use("/fee", AddFee);
 app.use('/attendance', AddAttendence);
 // app.use('/timetable', Timetable);
 app.use("/addbus", AddBus);
