@@ -62,7 +62,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.29.100:5000",
+  // baseURL: "http://192.168.29.100:5000",
+  baseURL: "http://20.204.205.244:3000",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -101,7 +102,8 @@ api.interceptors.response.use(
         if (!refreshToken) throw new Error("No refresh token");
 
         const res = await axios.post(
-          "http://192.168.29.100:5000/student-auth/refresh-token",
+          // "http://192.168.29.100:5000/student-auth/refresh-token",
+          "http://20.204.205.244:3000/student-auth/refresh-token",
           { refreshToken }
         );
 

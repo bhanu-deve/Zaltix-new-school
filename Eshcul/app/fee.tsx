@@ -8,6 +8,9 @@ import Toast from 'react-native-toast-message';
 import { useLang } from './language';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/api";
+// import RazorpayCheckout from 'react-native-razorpay';
+import { useRouter } from "expo-router";
+
 
 interface FeeRecord {
   id: string;
@@ -21,6 +24,8 @@ interface FeeRecord {
 const FeeScreen = () => {
   const { t } = useLang();
   const [fees, setFees] = useState<FeeRecord[]>([]);
+  const router = useRouter();
+
 
   useEffect(() => {
     loadFees();
@@ -38,7 +43,7 @@ const FeeScreen = () => {
       });
 
       const mapped = res.data.map((f: any, index: number) => ({
-        id: `${index}`,
+        id: f._id,
         label: f.feeType,
         amount: f.amount,
         paidAmount: f.paidAmount,
@@ -81,32 +86,43 @@ const FeeScreen = () => {
     </html>
   `;
 
-  const handleDownloadInvoice = async (item: FeeRecord) => {
+  const handlePayment = async (item: FeeRecord) => {
     try {
-      const html = generateInvoiceHTML(item);
-      const { uri } = await Print.printToFileAsync({ html });
+      const amountToPay = item.amount - item.paidAmount;
 
-      const newPath = `${FileSystem.documentDirectory}Invoice_${item.label.replace(' ', '_')}.pdf`;
-      await FileSystem.moveAsync({ from: uri, to: newPath });
+      console.log("Creating order for amount:", amountToPay);
 
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(newPath);
-      } else {
-        Alert.alert('Saved', 'Invoice saved successfully');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert(t.error, t.invoiceFailed);
+      const res = await api.post("/api/payment/create-order", {
+        amount: amountToPay,
+      });
+
+      console.log("Order created:", res.data);
+
+      router.push({
+        pathname: "/payment-webview",
+        params: {
+          order: JSON.stringify(res.data),
+          feeId: item.id,
+          amount: amountToPay,
+        },
+      });
+
+    } catch (err: any) {
+      console.log("🔥 PAYMENT ERROR FULL:", err);
+      console.log("🔥 RESPONSE:", err?.response?.data);
+      console.log("🔥 STATUS:", err?.response?.status);
+      console.log("🔥 MESSAGE:", err?.message);
+
+      Alert.alert(
+        "Payment Error",
+        err?.response?.data?.error ||
+        err?.message ||
+        "Unknown error"
+      );
     }
   };
 
-  const handlePayment = (item: FeeRecord) => {
-    Toast.show({
-      type: 'success',
-      text1: t.paymentSuccessful,
-      text2: `${item.label} fee has been paid 🎉`,
-    });
-  };
+
 
   const totalFees = fees.reduce((sum, item) => sum + item.amount, 0);
   const totalPaid = fees.reduce((sum, item) => sum + item.paidAmount, 0);
