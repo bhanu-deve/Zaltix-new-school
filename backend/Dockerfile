@@ -12,7 +12,6 @@ RUN npm ci --only=production && npm cache clean --force
 FROM node:18-alpine
 WORKDIR /app
 
-# 🔴 ADD THIS LINE (FIX)
 RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
