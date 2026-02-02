@@ -38,6 +38,7 @@ import staffRoutes from './routes/staffRoutes.js';
 
 import feeManagementRoutes from "./routes/feeManagementRoutes.js";
 
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 
 
@@ -125,6 +126,8 @@ app.use("/report-subjects", ReportSubjectRoute);
 app.use('/timetable', AddTimetableRoute);
 
 app.use("/api/fees", feeManagementRoutes);
+
+app.use("/api/payment", paymentRoutes);
 
 
 
