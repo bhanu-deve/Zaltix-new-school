@@ -219,6 +219,7 @@ import {
   FlatList,
   Dimensions,
   StatusBar,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -227,6 +228,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '@/api/api';
 import { socket } from "@/api/socket";
 import { useLang } from '../language';
+
 
 
 
@@ -254,11 +256,13 @@ const cardSize = (screenWidth - 40 - numColumns * 16) / numColumns;
 
 export default function HomeScreen() {
   const router = useRouter();
+  
   const { t } = useLang();
 
   const [student, setStudent] = useState<any>(null);
   const [notificationCount, setNotificationCount] = useState(0);
   const [latestNotification, setLatestNotification] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
     // 🔹 LOAD STUDENT FROM ASYNC STORAGE
   useEffect(() => {
     const loadStudent = async () => {
@@ -282,10 +286,19 @@ export default function HomeScreen() {
 
 
   useEffect(() => {
-    socket.on("new-notification", (notification) => {
+    socket.on("new-notification", async (notification) => {
+      const enabled = await AsyncStorage.getItem('notificationsEnabled');
+
+      if (enabled === 'false') {
+        console.log("Notifications disabled — skipping");
+        return;
+      }
+
       setLatestNotification(notification);
-      setNotificationCount((c) => c + 1);
+      setNotificationCount(prev => prev + 1);
     });
+
+
 
     return () => {
       socket.off("new-notification");
@@ -362,6 +375,55 @@ export default function HomeScreen() {
     };
     if (routes[name]) router.push(routes[name]);
   };
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      // Reload student
+      const s = await AsyncStorage.getItem('student');
+      if (s) {
+        setStudent(JSON.parse(s));
+      }
+
+      // Reload notifications
+      if (!s) return;
+
+      const studentData = JSON.parse(s);
+      const studentClass = `${studentData.grade}-${studentData.section}`;
+
+      const res = await api.get('/AddNotification');
+      const data = Array.isArray(res.data) ? res.data : [];
+
+      const filtered = data.filter(
+        n => n.audience === 'ALL' || n.audience === studentClass
+      );
+
+      filtered.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+      );
+
+      if (filtered.length > 0) {
+        setLatestNotification(filtered[0]);
+
+        const storedLastSeen = await AsyncStorage.getItem('lastSeenNotificationTime');
+        const latestTime = new Date(filtered[0].createdAt).getTime();
+
+        if (!storedLastSeen || latestTime > Number(storedLastSeen)) {
+          setNotificationCount(filtered.length);
+        } else {
+          setNotificationCount(0);
+        }
+      }
+
+    } catch (error) {
+      console.log("Refresh error:", error);
+    }
+
+    setRefreshing(false);
+  };
+
 
   const handleNotificationPress = async () => {
     if (latestNotification?.createdAt) {
@@ -488,6 +550,14 @@ export default function HomeScreen() {
           numColumns={numColumns}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.cardsContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#1e88e5']}   // Android
+              tintColor="#1e88e5"    // iOS
+            />
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[styles.cardWrapper, { width: cardSize, height: cardSize }]}
@@ -597,6 +667,16 @@ const styles = StyleSheet.create({
   badgeChipLightText: { marginLeft: 4, fontSize: 11, fontWeight: '600', color: '#16a34a' },
 
   /* Notification card */
+  // notificationCard: {
+  //   backgroundColor: '#fff',
+  //   borderRadius: 20,
+  //   paddingVertical: 16,
+  //   paddingHorizontal: 16,
+  //   marginBottom: 18,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   elevation: 4,
+  // },
   notificationCard: {
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -605,8 +685,14 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 4,
+
+    elevation: 6, // increased
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
   },
+
   notificationLeft: {
     flex: 1,
   },

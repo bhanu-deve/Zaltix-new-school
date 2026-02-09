@@ -21,6 +21,7 @@ import { useLang } from '../language';
 export default function SettingsScreen() {
   const router = useRouter();
   const { lang, changeLanguage, t } = useLang();
+  
 
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -44,6 +45,16 @@ export default function SettingsScreen() {
     };
     loadStudent();
   }, []);
+  useEffect(() => {
+    const loadSetting = async () => {
+      const value = await AsyncStorage.getItem('notificationsEnabled');
+      if (value !== null) {
+        setNotificationsEnabled(value === 'true');
+      }
+    };
+    loadSetting();
+  }, []);
+
 
   // ================= LOGOUT =================
   const handleLogout = async () => {
@@ -190,8 +201,12 @@ export default function SettingsScreen() {
           <SettingItem icon="notifications" text={t.notifications ?? 'Notifications'}>
             <Switch
               value={notificationsEnabled}
-              onValueChange={() => setNotificationsEnabled(!notificationsEnabled)}
+              onValueChange={async (value) => {
+                setNotificationsEnabled(value);
+                await AsyncStorage.setItem('notificationsEnabled', value.toString());
+              }}
             />
+
           </SettingItem>
 
           <SettingItem icon="help-circle" text={t.helpSupport ?? 'Help & Support'} onPress={handleHelpSupport} />

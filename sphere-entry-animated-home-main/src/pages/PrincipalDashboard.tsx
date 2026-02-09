@@ -157,7 +157,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   BarChart3, Users, Calendar, FileText, Settings, LogOut, Crown, DollarSign,
-  Package, Bell, Trophy, MessageSquare, Bus
+  Package, Bell, Trophy, MessageSquare, Bus,
 } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import React, { useEffect } from 'react';
@@ -292,6 +292,14 @@ const PrincipalDashboard = () => {
       icon: <Settings className="w-6 h-6" />,
       path: "/principal/change-password",
       gradient: "bg-gradient-to-br from-gray-200 to-gray-300"
+    },
+    // In the dashboardItems array, add this item:
+    {
+      title: 'Holidays',
+      description: 'Manage school holidays & breaks',
+      icon: <Calendar className="w-6 h-6" />,
+      path: '/dashboard/principal/holidays',
+      gradient: 'bg-gradient-to-br from-amber-200 to-amber-300'
     }
 
 

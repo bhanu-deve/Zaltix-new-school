@@ -39,6 +39,7 @@ import staffRoutes from './routes/staffRoutes.js';
 import feeManagementRoutes from "./routes/feeManagementRoutes.js";
 
 import paymentRoutes from "./routes/paymentRoutes.js";
+import holidayRoutes from "./routes/holidayRoutes.js";
 
 
 
@@ -160,6 +161,7 @@ app.use("/students", AddStudent);
 app.use("/driver", DriverAuthRoute);
 app.use("/submitProject", SubmitProjectRoute);
 app.use("/project-submissions", ProjectSubmissionRoute);
+app.use("/api/holidays", holidayRoutes);
 
 /* DB ERROR HANDLER */
 Db.on('error', (err) => console.error('MongoDB error:', err));

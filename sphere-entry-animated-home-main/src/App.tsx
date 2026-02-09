@@ -134,7 +134,7 @@ import TeacherForgotPassword from "./pages/TeacherForgotPassword";
 import TeacherChangePassword from "./pages/teacher/ChangePassword";
 import RequireAuth from "./routes/RequireAuth";
 import AddStudent from "./pages/principal/AddStudent";
-
+import Holidays from "./pages/principal/Holidays";
 
 
 const queryClient = new QueryClient();
@@ -432,6 +432,14 @@ const App = () => (
           <Route
             path="/principal/forgot-password"
             element={<PrincipalForgotPassword />}
+          />
+          <Route
+            path="/dashboard/principal/holidays"
+            element={
+              <RequireAuth role="principal">
+                <Holidays />
+              </RequireAuth>
+            }
           />
 
 

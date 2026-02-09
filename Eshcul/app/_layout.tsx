@@ -11,15 +11,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socket } from '@/api/socket';
 import { LanguageProvider } from './language';
 
+// Notifications.setNotificationHandler({
+//   handleNotification: async (): Promise<Notifications.NotificationBehavior> => ({
+//     shouldShowAlert: true,   // popup
+//     shouldPlaySound: true,
+//     shouldSetBadge: false,  // ❌ no app icon badge
+//     shouldShowBanner: true, // iOS banner
+//     shouldShowList: true,   // iOS notification list
+//   }),
+// });
 Notifications.setNotificationHandler({
-  handleNotification: async (): Promise<Notifications.NotificationBehavior> => ({
-    shouldShowAlert: true,   // popup
-    shouldPlaySound: true,
-    shouldSetBadge: false,  // ❌ no app icon badge
-    shouldShowBanner: true, // iOS banner
-    shouldShowList: true,   // iOS notification list
-  }),
+  handleNotification: async () => {
+    const enabled = await AsyncStorage.getItem('notificationsEnabled');
+
+    if (enabled === 'false') {
+      return {
+        shouldShowBanner: false,
+        shouldShowList: false,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+      };
+    }
+
+    return {
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+    
+  },
+  
 });
+
+
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
