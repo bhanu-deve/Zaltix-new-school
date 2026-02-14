@@ -16,10 +16,7 @@ const notificationSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    // sentDate: {
-    //   type: Date,
-    //   default: Date.now,
-    // },
+  
     status: {
       type: String,
       enum: ['Sent', 'Failed'],

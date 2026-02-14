@@ -1,32 +1,3 @@
-// import mongoose from 'mongoose';
-
-// const TeacherFeedbackSchema = new mongoose.Schema({
-//   teacher: {
-//     type: String,
-//     required: true,
-//     enum: ['ramesh', 'priya', 'kiran', 'sneha'],
-//   },
-//   feedback: {
-//     type: String,
-//     required: true,
-//   },
-//   rating: {
-//     type: Number,
-//     required: true,
-//     min: 1,
-//     max: 5,
-//   },
-//   date: {
-//     type: Date,
-//     default: Date.now,
-//   },
-// });
-
-// const StudentFeedback = mongoose.model('StudentFeedback', TeacherFeedbackSchema);
-// export default StudentFeedback;
-
-
-
 import mongoose from 'mongoose';
 
 const StudentFeedbackSchema = new mongoose.Schema(
@@ -44,7 +15,7 @@ const StudentFeedbackSchema = new mongoose.Schema(
       required: true,
     },
 
-    // 👇 LINK TO STAFF COLLECTION
+   
     teacherId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Staff',
@@ -55,7 +26,7 @@ const StudentFeedbackSchema = new mongoose.Schema(
       required: true,
     },
     teacherRole: {
-      type: String, // e.g. "Mathematics Teacher"
+      type: String, 
     },
 
     feedback: {

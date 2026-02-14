@@ -8,7 +8,6 @@ const router = express.Router();
 router.post("/", addStudent);
 
 
-// GET all students (Principal view)
 router.get("/all", async (req, res) => {
   try {
     const { grade, section } = req.query;

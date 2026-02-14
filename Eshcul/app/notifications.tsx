@@ -54,22 +54,6 @@ export default function NotificationsScreen() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchNotifications();
-  //   socket.on("new-notification", async (notification) => {
-  //     const enabled = await AsyncStorage.getItem('notificationsEnabled');
-
-  //     if (enabled === 'false') return;
-
-  //     setNotifications((prev) => [notification, ...prev]);
-      
-  //   });
-
-
-  //   return () => {
-  //     socket.off("new-notification");
-  //   };
-  // }, []);
   useEffect(() => {
     fetchNotifications();
   }, []);

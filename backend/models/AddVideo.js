@@ -6,7 +6,7 @@ const videoSchema = new mongoose.Schema({
   subject: { type: String, required: true },
   url: { type: String, required: true },
   thumbnail: { type: String, default: '/placeholder.svg' },
-  uploadDate: { type: String }, // format: 'YYYY-MM-DD'
+  uploadDate: { type: String }, 
 }, { timestamps: true });
 
 const Video = mongoose.model('Video', videoSchema);

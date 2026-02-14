@@ -1,140 +1,3 @@
-// import React, { useState } from 'react';
-// import { View, Text, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
-// import { MaterialIcons } from '@expo/vector-icons';
-
-// interface Message {
-//   id: string;
-//   text: string;
-//   sender: 'student' | 'teacher';
-//   time: string;
-// }
-
-// export default function ChatBox() {
-//   const [messages, setMessages] = useState<Message[]>([
-//     { id: '1', text: 'Hello Ma’am, I have a doubt in today’s homework.', sender: 'student', time: '10:01 AM' },
-//     { id: '2', text: 'Sure, what’s your doubt?', sender: 'teacher', time: '10:03 AM' },
-//   ]);
-//   const [inputText, setInputText] = useState('');
-
-//   const handleSend = () => {
-//     if (inputText.trim() === '') return;
-
-//     const newMessage: Message = {
-//       id: Date.now().toString(),
-//       text: inputText,
-//       sender: 'student',
-//       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-//     };
-
-//     setMessages((prev) => [...prev, newMessage]);
-//     setInputText('');
-//   };
-
-//   const renderItem = ({ item }: { item: Message }) => (
-//     <View style={[styles.messageBubble, item.sender === 'student' ? styles.student : styles.teacher]}>
-//       <Text style={styles.messageText}>{item.text}</Text>
-//       <Text style={styles.messageTime}>{item.time}</Text>
-//     </View>
-//   );
-
-//   return (
-//     <KeyboardAvoidingView
-//       style={styles.container}
-//       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-//       keyboardVerticalOffset={80}
-//     >
-//       <Text style={styles.header}>Chat with Class Teacher</Text>
-//       <FlatList
-//         data={messages}
-//         keyExtractor={(item) => item.id}
-//         renderItem={renderItem}
-//         contentContainerStyle={styles.chatContainer}
-//         showsVerticalScrollIndicator={false}
-//       />
-
-//       <View style={styles.inputContainer}>
-//         <TextInput
-//           value={inputText}
-//           onChangeText={setInputText}
-//           placeholder="Type your message..."
-//           style={styles.textInput}
-//         />
-//         <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-//           <MaterialIcons name="send" size={24} color="#fff" />
-//         </TouchableOpacity>
-//       </View>
-//     </KeyboardAvoidingView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#f1f8e9',
-//   },
-//   header: {
-//     fontSize: 22,
-//     fontWeight: 'bold',
-//     color: '#33691e',
-//     padding: 16,
-//     backgroundColor: '#dcedc8',
-//     textAlign: 'center',
-//     elevation: 2,
-//   },
-//   chatContainer: {
-//     padding: 16,
-//   },
-//   messageBubble: {
-//     maxWidth: '75%',
-//     padding: 12,
-//     marginBottom: 12,
-//     borderRadius: 16,
-//   },
-//   student: {
-//     backgroundColor: '#a5d6a7',
-//     alignSelf: 'flex-end',
-//     borderTopRightRadius: 0,
-//   },
-//   teacher: {
-//     backgroundColor: '#fff',
-//     alignSelf: 'flex-start',
-//     borderTopLeftRadius: 0,
-//     borderWidth: 1,
-//     borderColor: '#cfd8dc',
-//   },
-//   messageText: {
-//     fontSize: 16,
-//     color: '#212121',
-//   },
-//   messageTime: {
-//     fontSize: 12,
-//     color: '#616161',
-//     marginTop: 6,
-//     textAlign: 'right',
-//   },
-//   inputContainer: {
-//     flexDirection: 'row',
-//     padding: 12,
-//     backgroundColor: '#fff',
-//     borderTopWidth: 1,
-//     borderColor: '#cfd8dc',
-//   },
-//   textInput: {
-//     flex: 1,
-//     backgroundColor: '#f0f4c3',
-//     borderRadius: 25,
-//     paddingHorizontal: 16,
-//     fontSize: 16,
-//     marginRight: 10,
-//   },
-//   sendButton: {
-//     backgroundColor: '#558b2f',
-//     borderRadius: 25,
-//     padding: 12,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-// });
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -146,10 +9,13 @@ import {
   Platform,
   StyleSheet,
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter, useNavigation } from 'expo-router';
+import { useLayoutEffect } from 'react';
 import api from "../api/api";
 import { useLang } from "./language";
+
 /* ================= TYPES ================= */
 interface Message {
   id: string;
@@ -163,9 +29,16 @@ const chatbotIntents: Record<string, () => Promise<string>> = {};
 
 /* ================= COMPONENT ================= */
 export default function ChatBox() {
+  const router = useRouter();
+  const navigation = useNavigation();
   const { t } = useLang();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
+
+  // Hide default navbar
+  useLayoutEffect(() => {
+    navigation.setOptions({ headerShown: false });
+  }, [navigation]);
 
   /* ============ WELCOME MESSAGE ============ */
   useEffect(() => {
@@ -447,14 +320,23 @@ export default function ChatBox() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={80}
     >
-      <View style={styles.header}>
-        <View style={styles.headerIcon}>
-          <Text style={styles.headerIconText}>💬</Text>
-        </View>
-        <View>
-          <Text style={styles.headerTitle}>{t.chatbot}</Text>
-          <Text style={styles.headerSubtitle}>{t.schoolAssistant}</Text>
-
+      {/* Custom Header with Back Button */}
+      <View style={styles.headerContainer}>
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color="#1e293b" />
+        </TouchableOpacity>
+        
+        <View style={styles.header}>
+          <View style={styles.headerIcon}>
+            <Text style={styles.headerIconText}>💬</Text>
+          </View>
+          <View>
+            <Text style={styles.headerTitle}>{t.chatbot}</Text>
+            <Text style={styles.headerSubtitle}>{t.schoolAssistant}</Text>
+          </View>
         </View>
       </View>
 
@@ -487,18 +369,40 @@ export default function ChatBox() {
 const getTime = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-/* ================= STYLES (UNCHANGED UI) ================= */
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
+  container: { 
+    flex: 1, 
+    backgroundColor: "#f8fafc",
+    paddingTop: 50, // Increased for status bar
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 16,
     paddingBottom: 12,
     backgroundColor: "#ffffff",
     borderBottomWidth: 1,
     borderBottomColor: "#f1f5f9",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  header: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerIcon: {
     width: 46,

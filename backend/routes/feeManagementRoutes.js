@@ -9,14 +9,11 @@ import ClassFee from "../models/ClassFee.js";
 
 const router = express.Router();
 
-/* CREATE ROUTES */
 router.post("/class", createClassFee);
 router.post("/student", createStudentFee);
 
-/* STUDENT APP ROUTE */
 router.get("/my-fees", getFeesForStudent);
 
-/* PRINCIPAL PANEL ROUTES */
 router.get("/student", async (req, res) => {
   try {
     const data = await StudentFee.find();

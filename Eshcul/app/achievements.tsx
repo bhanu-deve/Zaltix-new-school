@@ -1,310 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import {
-//   View,
-//   StyleSheet,
-//   FlatList,
-//   Alert,
-//   Image,
-//   Modal,
-//   Text,
-//   useWindowDimensions,
-//   ActivityIndicator,
-// } from 'react-native';
-// import { Card, Title, Paragraph, Button } from 'react-native-paper';
-// import * as FileSystem from 'expo-file-system/legacy';
-// import * as Sharing from 'expo-sharing';
-// import { WebView } from 'react-native-webview';
-// // import {Api_url} from './config/config.js'
-// import api from "../api/api";
-
-
-// interface Achievement {
-//   id: string;
-//   title: string;
-//   student: string;
-//   date: string;
-//   description: string;
-//   category: string;
-//   fileUrl: string | null;
-//   fileType: string;
-// }
-
-// // const BASE_URL = 'http://13.203.156.49:5000'; // ✅ Change to your server IP
-
-// const AchievementsScreen = () => {
-//   const [achievements, setAchievements] = useState<Achievement[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [modalVisible, setModalVisible] = useState(false);
-//   const [selectedFile, setSelectedFile] = useState<Achievement | null>(null);
-//   const { width } = useWindowDimensions();
-
-//   useEffect(() => {
-//     const fetchAchievements = async () => {
-//       try {
-//         setLoading(true);
-//         console.log('Fetching achievements...');
-//         const res = await api.get('/achievements');
-//         console.log('Achievements response:', res.data);
-//         const data = res.data;
-//         const achievementsArray = Array.isArray(data)
-//           ? data
-//           : data?.achievements || data?.data || [];
-
-//         console.log('Achievements array:', achievementsArray);
-
-//         const formatted = achievementsArray.map((item: any) => ({
-//           id: item._id?.$oid || item._id || Math.random().toString(),
-//           title: item.title || 'Untitled',
-//           student: item.student || 'Unknown',
-//           date: item.date || '-',
-//           description: item.description || '-',
-//           category: item.category || 'General',
-//           fileUrl: item.fileUrl?.startsWith('http')
-//             ? item.fileUrl
-//             : item.fileUrl?.startsWith('/')
-//             ? `${api.defaults.baseURL}${item.fileUrl}`
-//             : item.fileUrl
-//             ? `${api.defaults.baseURL}/${item.fileUrl}`
-//             : null,
-//           fileType: item.fileType || 'image/jpeg',
-//         }));
-
-//         console.log('Formatted achievements:', formatted);
-//         setAchievements(formatted);
-//       } catch (error: any) {
-//         console.error('Fetch error:', error);
-//         console.error('Error details:', error?.response?.data || error?.message);
-//         const errorMessage = error?.response?.data?.error || error?.response?.data?.message || error?.message || 'Failed to load achievements';
-//         Alert.alert('Error', errorMessage);
-//         setAchievements([]);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchAchievements();
-//   }, []);
-
-//   const handleViewFile = (item: Achievement) => {
-//     setSelectedFile(item);
-//     setModalVisible(true);
-//   };
-
-//   const handleDownload = async () => {
-//     if (!selectedFile || !selectedFile.fileUrl) {
-//       Alert.alert('Error', 'No file URL available');
-//       return;
-//     }
-
-//     try {
-//       const fileExt = selectedFile.fileType.includes('pdf') ? 'pdf' : 'jpg';
-//       const safeTitle = selectedFile.title
-//         .replace(/[^a-z0-9]/gi, '_')
-//         .toLowerCase();
-//       const fileName = `${safeTitle}_${Date.now()}.${fileExt}`;
-//       const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
-//       const { uri } = await FileSystem.downloadAsync(
-//         selectedFile.fileUrl,
-//         fileUri
-//       );
-
-//       if (await Sharing.isAvailableAsync()) {
-//         await Sharing.shareAsync(uri);
-//       } else {
-//         Alert.alert('Downloaded', `File saved to:\n${uri}`);
-//       }
-//     } catch (error: any) {
-//       console.error('Download error:', error);
-//       Alert.alert('Error', `Failed to download file: ${error.message || error}`);
-//     }
-//   };
-
-//   const renderAchievement = ({ item }: { item: Achievement }) => (
-//     <Card style={styles.card}>
-//       <Card.Content>
-//         <Title>{item.title}</Title>
-//         <Paragraph>👤 {item.student}</Paragraph>
-//         <Paragraph>🏅 {item.category}</Paragraph>
-//         <Paragraph>📅 {item.date}</Paragraph>
-//         <Paragraph>Description: {item.description}</Paragraph>
-//         {item.fileType.includes('image') && item.fileUrl && (
-//           <Image source={{ uri: item.fileUrl }} style={styles.image} />
-//         )}
-//       </Card.Content>
-//       <Card.Actions>
-//         <Button mode="contained" onPress={() => handleViewFile(item)}>
-//           View File
-//         </Button>
-//       </Card.Actions>
-//     </Card>
-//   );
-
-//   if (loading) {
-//     return (
-//       <View style={styles.loadingContainer}>
-//         <ActivityIndicator size="large" color="#2575fc" />
-//         <Text style={styles.loadingText}>Loading achievements...</Text>
-//       </View>
-//     );
-//   }
-
-//   if (achievements.length === 0) {
-//     return (
-//       <View style={styles.emptyContainer}>
-//         <Text style={styles.emptyText}>No achievements found</Text>
-//         <Text style={styles.emptySubtext}>Check back later for new achievements</Text>
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.header}>Achievements</Text>
-//       <FlatList
-//         data={achievements}
-//         keyExtractor={(item) => item.id}
-//         renderItem={renderAchievement}
-//         contentContainerStyle={{ paddingBottom: 20 }}
-//         ListEmptyComponent={
-//           <View style={styles.emptyContainer}>
-//             <Text style={styles.emptyText}>No achievements available</Text>
-//           </View>
-//         }
-//       />
-
-//       {/* File Preview Modal */}
-//       <Modal
-//         animationType="slide"
-//         transparent
-//         visible={modalVisible}
-//         onRequestClose={() => setModalVisible(false)}
-//       >
-//         <View style={styles.modalOverlay}>
-//           <View style={styles.modalContent}>
-//             {selectedFile && selectedFile.fileUrl && (
-//               <>
-//                 <Text style={styles.modalTitle}>{selectedFile.title}</Text>
-//                 {selectedFile.fileType.includes('pdf') ? (
-//                   <WebView
-//                     source={{ uri: selectedFile.fileUrl }}
-//                     style={styles.modalViewer}
-//                   />
-//                 ) : (
-//                   <Image
-//                     source={{ uri: selectedFile.fileUrl }}
-//                     style={styles.modalViewer}
-//                     resizeMode="contain"
-//                   />
-//                 )}
-//                 <View style={styles.modalActions}>
-//                   <Button mode="contained" onPress={handleDownload}>
-//                     Download
-//                   </Button>
-//                   <Button
-//                     mode="outlined"
-//                     onPress={() => {
-//                       setModalVisible(false);
-//                       setSelectedFile(null);
-//                     }}
-//                     style={{ marginLeft: 10 }}
-//                   >
-//                     Close
-//                   </Button>
-//                 </View>
-//               </>
-//             )}
-//           </View>
-//         </View>
-//       </Modal>
-//     </View>
-//   );
-// };
-
-// export default AchievementsScreen;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#f6f9ff',
-//   },
-//   header: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     color: '#2575fc',
-//     marginBottom: 16,
-//     textAlign: 'center',
-//   },
-//   loadingContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: '#f6f9ff',
-//   },
-//   loadingText: {
-//     marginTop: 12,
-//     fontSize: 16,
-//     color: '#666',
-//   },
-//   emptyContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     padding: 40,
-//     backgroundColor: '#f6f9ff',
-//   },
-//   emptyText: {
-//     fontSize: 18,
-//     fontWeight: '600',
-//     color: '#666',
-//     marginBottom: 8,
-//   },
-//   emptySubtext: {
-//     fontSize: 14,
-//     color: '#999',
-//     textAlign: 'center',
-//   },
-//   card: {
-//     marginBottom: 16,
-//     borderRadius: 10,
-//   },
-//   image: {
-//     width: '100%',
-//     height: 200,
-//     marginTop: 10,
-//     borderRadius: 8,
-//   },
-//   modalOverlay: {
-//     flex: 1,
-//     backgroundColor: 'rgba(0,0,0,0.5)',
-//     justifyContent: 'center',
-//     padding: 20,
-//   },
-//   modalContent: {
-//     backgroundColor: '#fff',
-//     borderRadius: 12,
-//     padding: 16,
-//     alignItems: 'center',
-//     maxHeight: '85%',
-//   },
-//   modalTitle: {
-//     fontSize: 18,
-//     fontWeight: '600',
-//     marginBottom: 12,
-//     textAlign: 'center',
-//   },
-//   modalViewer: {
-//     width: 300,
-//     height: 400,
-//     borderRadius: 10,
-//     backgroundColor: '#eee',
-//   },
-//   modalActions: {
-//     flexDirection: 'row',
-//     marginTop: 16,
-//   },
-// });
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -314,14 +7,17 @@ import {
   Modal,
   Text,
   ActivityIndicator,
+  Image,
+  TouchableOpacity,
+  ScrollView,
 } from 'react-native';
-import { Card, Title, Paragraph, Button } from 'react-native-paper';
-import * as FileSystem from 'expo-file-system/legacy';
+import { Card, Title, Button } from 'react-native-paper';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { WebView } from 'react-native-webview';
-// import {Api_url} from './config/config.js'
-import api from "../api/api";
+import api from '../api/api';
 import { useLang } from './language';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Achievement {
   id: string;
@@ -340,48 +36,88 @@ const AchievementsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFile, setSelectedFile] = useState<Achievement | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    const fetchAchievements = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get('/achievements');
-        const data = res.data;
-        const achievementsArray = Array.isArray(data)
-          ? data
-          : data?.achievements || data?.data || [];
-
-        const formatted = achievementsArray.map((item: any) => ({
-          id: item._id?.$oid || item._id || Math.random().toString(),
-          title: item.title || t.untitled,
-          student: item.student || t.unknown,
-
-          date: item.date || '-',
-          description: item.description || '-',
-          category: item.category || 'General',
-          fileUrl: item.fileUrl?.startsWith('http')
-            ? item.fileUrl
-            : item.fileUrl?.startsWith('/')
-            ? `${api.defaults.baseURL}${item.fileUrl}`
-            : item.fileUrl
-            ? `${api.defaults.baseURL}/${item.fileUrl}`
-            : null,
-          fileType: item.fileType || 'image/jpeg',
-        }));
-
-        setAchievements(formatted);
-      } catch (error: any) {
-        console.error('Fetch error:', error);
-        const errorMessage = error?.response?.data?.error || error?.response?.data?.message || error?.message || 'Failed to load achievements';
-        Alert.alert('Error', errorMessage);
-        setAchievements([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAchievements();
   }, []);
+
+  const fetchAchievements = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/achievements');
+      const data = res.data;
+      const achievementsArray = Array.isArray(data)
+        ? data
+        : data?.achievements || data?.data || [];
+
+      const formatted = achievementsArray.map((item: any) => ({
+        id: item._id?.$oid || item._id || Math.random().toString(),
+        title: item.title || t.untitled || 'Untitled',
+        student: item.student || t.unknown || 'Unknown',
+        date: formatDate(item.date) || '-',
+        description: item.description || '-',
+        category: item.category || 'General',
+        fileUrl: formatFileUrl(item.fileUrl),
+        fileType: item.fileType || getFileTypeFromUrl(item.fileUrl),
+      }));
+
+      setAchievements(formatted);
+    } catch (error: any) {
+      console.error('Fetch error:', error);
+      const errorMessage = error?.response?.data?.error || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          'Failed to load achievements';
+      Alert.alert('Error', errorMessage);
+      setAchievements([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const formatFileUrl = (fileUrl: string | null): string | null => {
+    if (!fileUrl) return null;
+    
+    if (fileUrl.startsWith('http')) {
+      return fileUrl;
+    }
+    
+    const baseURL = api.defaults.baseURL?.replace(/\/$/, '') || '';
+    const cleanFileUrl = fileUrl.replace(/^\//, '');
+    return `${baseURL}/${cleanFileUrl}`;
+  };
+
+  const getFileTypeFromUrl = (url: string | null): string => {
+    if (!url) return 'application/octet-stream';
+    
+    const extension = url.split('.').pop()?.toLowerCase();
+    const mimeTypes: { [key: string]: string } = {
+      pdf: 'application/pdf',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    };
+    
+    return mimeTypes[extension || ''] || 'application/octet-stream';
+  };
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -394,7 +130,22 @@ const AchievementsScreen = () => {
     return colors[category.toLowerCase()] || '#64748B';
   };
 
+  const getCategoryIcon = (category: string) => {
+    const icons: { [key: string]: string } = {
+      academic: '📚',
+      sports: '⚽',
+      arts: '🎨',
+      leadership: '👑',
+      general: '🏆',
+    };
+    return icons[category.toLowerCase()] || '🏆';
+  };
+
   const handleViewFile = (item: Achievement) => {
+    if (!item.fileUrl) {
+      Alert.alert('Info', 'No file attached to this achievement');
+      return;
+    }
     setSelectedFile(item);
     setModalVisible(true);
   };
@@ -406,41 +157,55 @@ const AchievementsScreen = () => {
     }
 
     try {
-      const fileExt = selectedFile.fileType.includes('pdf') ? 'pdf' : 'jpg';
+      setDownloading(true);
+      
+      const fileExt = selectedFile.fileType.includes('pdf') ? 'pdf' : 
+                     selectedFile.fileType.includes('image') ? 'jpg' : 'file';
       const safeTitle = selectedFile.title
         .replace(/[^a-z0-9]/gi, '_')
-        .toLowerCase();
+        .toLowerCase()
+        .substring(0, 30);
       const fileName = `${safeTitle}_${Date.now()}.${fileExt}`;
       const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
-      const { uri } = await FileSystem.downloadAsync(
+      const downloadResumable = FileSystem.createDownloadResumable(
         selectedFile.fileUrl,
-        fileUri
+        fileUri,
+        {},
+        (downloadProgress) => {
+          const progress = downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
+          console.log(`Download progress: ${progress * 100}%`);
+        }
       );
 
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri);
+      const result = await downloadResumable.downloadAsync();
+      
+      if (result && await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(result.uri);
       } else {
-        Alert.alert('Downloaded', `File saved to:\n${uri}`);
+        Alert.alert('Download Complete', `File saved to device`);
       }
     } catch (error: any) {
       console.error('Download error:', error);
       Alert.alert('Error', `Failed to download file: ${error.message || error}`);
+    } finally {
+      setDownloading(false);
     }
   };
 
   const renderAchievement = ({ item }: { item: Achievement }) => {
     const categoryColor = getCategoryColor(item.category);
+    const categoryIcon = getCategoryIcon(item.category);
     
     return (
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
           <View style={styles.headerRow}>
             <View style={[styles.iconContainer, { backgroundColor: categoryColor + '20' }]}>
-              <Text style={[styles.iconText, { color: categoryColor }]}>🏆</Text>
+              <Text style={[styles.iconText, { color: categoryColor }]}>{categoryIcon}</Text>
             </View>
             <View style={styles.titleContainer}>
-              <Title style={styles.title}>{item.title}</Title>
+              <Title style={styles.title} numberOfLines={2}>{item.title}</Title>
               <View style={[styles.categoryBadge, { backgroundColor: categoryColor + '15' }]}>
                 <Text style={[styles.categoryText, { color: categoryColor }]}>
                   {item.category}
@@ -451,30 +216,37 @@ const AchievementsScreen = () => {
           
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>👤 {t.student}:</Text>
-              <Text style={styles.detailValue}>{item.student}</Text>
+              <Ionicons name="person-outline" size={16} color="#64748b" />
+              <Text style={styles.detailLabel}>Student:</Text>
+              <Text style={styles.detailValue} numberOfLines={1}>{item.student}</Text>
             </View>
             
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>📅 {t.date}:</Text>
+              <Ionicons name="calendar-outline" size={16} color="#64748b" />
+              <Text style={styles.detailLabel}>Date:</Text>
               <Text style={styles.detailValue}>{item.date}</Text>
             </View>
             
             <View style={styles.descriptionBox}>
-              <Text style={styles.descriptionLabel}>{t.description}:</Text>
-              <Text style={styles.descriptionText}>{item.description}</Text>
+              <Text style={styles.descriptionLabel}>Description:</Text>
+              <Text style={styles.descriptionText} numberOfLines={3}>
+                {item.description}
+              </Text>
             </View>
           </View>
         </Card.Content>
-        <Card.Actions style={styles.actions}>
-          <Button 
-            mode="contained"
-            style={[styles.viewButton, { backgroundColor: categoryColor }]}
-            onPress={() => handleViewFile(item)}
-          >
-           {t.viewAchievement}
-          </Button>
-        </Card.Actions>
+        
+        {item.fileUrl && (
+          <Card.Actions style={styles.actions}>
+            <TouchableOpacity
+              style={[styles.viewButton, { backgroundColor: categoryColor }]}
+              onPress={() => handleViewFile(item)}
+            >
+              <Ionicons name="eye-outline" size={18} color="#fff" />
+              <Text style={styles.viewButtonText}>View Achievement</Text>
+            </TouchableOpacity>
+          </Card.Actions>
+        )}
       </Card>
     );
   };
@@ -483,6 +255,7 @@ const AchievementsScreen = () => {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size="large" color="#3b82f6" />
+        <Text style={styles.loadingText}>Loading achievements...</Text>
       </View>
     );
   }
@@ -494,11 +267,10 @@ const AchievementsScreen = () => {
           <Text style={styles.headerIconText}>🏆</Text>
         </View>
         <View>
-          <Text style={styles.headerTitle}>{t.achievements}</Text>
+          <Text style={styles.headerTitle}>Achievements</Text>
           <Text style={styles.headerSubtitle}>
-            {achievements.length} {t.achievements}
+            {achievements.length} {achievements.length === 1 ? 'achievement' : 'achievements'} found
           </Text>
-
         </View>
       </View>
 
@@ -513,8 +285,10 @@ const AchievementsScreen = () => {
             <View style={styles.emptyIcon}>
               <Text style={styles.emptyIconText}>🏆</Text>
             </View>
-            <Text style={styles.emptyTitle}>{t.noAchievements}</Text>
-            <Text style={styles.emptyText}>{t.checkLater}</Text>
+            <Text style={styles.emptyTitle}>No Achievements Yet</Text>
+            <Text style={styles.emptyText}>
+              Check back later for updates on student achievements
+            </Text>
           </View>
         }
       />
@@ -522,60 +296,117 @@ const AchievementsScreen = () => {
       {/* File Preview Modal */}
       <Modal
         animationType="slide"
-        transparent
+        transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {selectedFile && selectedFile.fileUrl && (
+            {selectedFile && (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>{selectedFile.title}</Text>
+                  <View style={styles.modalHeaderTop}>
+                    <Text style={styles.modalTitle} numberOfLines={2}>
+                      {selectedFile.title}
+                    </Text>
+                    <TouchableOpacity 
+                      onPress={() => setModalVisible(false)}
+                      style={styles.modalCloseButton}
+                    >
+                      <Ionicons name="close" size={24} color="#64748b" />
+                    </TouchableOpacity>
+                  </View>
                   <View style={[styles.modalCategoryBadge, { 
                     backgroundColor: getCategoryColor(selectedFile.category) + '15' 
                   }]}>
                     <Text style={[styles.modalCategoryText, { 
                       color: getCategoryColor(selectedFile.category) 
                     }]}>
-                      {selectedFile.category}
+                      {getCategoryIcon(selectedFile.category)} {selectedFile.category}
                     </Text>
                   </View>
                 </View>
                 
-                {selectedFile.fileType.includes('pdf') ? (
-                  <WebView
-                    source={{ uri: selectedFile.fileUrl }}
-                    style={styles.modalViewer}
-                  />
-                ) : (
-                  <View style={styles.imageContainer}>
-                    {/* Image would be shown here if we had an Image component */}
-                    <Text style={styles.imagePlaceholder}>📷 Image Preview</Text>
+                <ScrollView style={styles.modalBody}>
+                  {selectedFile.fileUrl && (
+                    selectedFile.fileType.includes('pdf') ? (
+                      <WebView
+                        source={{ uri: selectedFile.fileUrl }}
+                        style={styles.modalViewer}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        startInLoadingState={true}
+                        renderLoading={() => (
+                          <View style={styles.webviewLoader}>
+                            <ActivityIndicator size="large" color="#3b82f6" />
+                          </View>
+                        )}
+                      />
+                    ) : selectedFile.fileType.includes('image') ? (
+                      <Image
+                        source={{ uri: selectedFile.fileUrl }}
+                        style={styles.modalImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={styles.fileInfoContainer}>
+                        <Ionicons name="document-outline" size={60} color="#3b82f6" />
+                        <Text style={styles.fileInfoText}>
+                          {selectedFile.fileType.split('/')[1]?.toUpperCase() || 'FILE'}
+                        </Text>
+                      </View>
+                    )
+                  )}
+                  
+                  <View style={styles.modalDetails}>
+                    <View style={styles.modalDetailRow}>
+                      <Ionicons name="person-outline" size={18} color="#64748b" />
+                      <Text style={styles.modalDetailLabel}>Student:</Text>
+                      <Text style={styles.modalDetailValue}>{selectedFile.student}</Text>
+                    </View>
+                    
+                    <View style={styles.modalDetailRow}>
+                      <Ionicons name="calendar-outline" size={18} color="#64748b" />
+                      <Text style={styles.modalDetailLabel}>Date:</Text>
+                      <Text style={styles.modalDetailValue}>{selectedFile.date}</Text>
+                    </View>
+                    
+                    <View style={styles.modalDescription}>
+                      <Text style={styles.modalDescriptionLabel}>Description:</Text>
+                      <Text style={styles.modalDescriptionText}>
+                        {selectedFile.description}
+                      </Text>
+                    </View>
                   </View>
-                )}
+                </ScrollView>
                 
                 <View style={styles.modalActions}>
-                  <Button 
-                    mode="contained" 
-                    style={[styles.downloadButton, { 
+                  <TouchableOpacity
+                    style={[styles.modalDownloadButton, { 
                       backgroundColor: getCategoryColor(selectedFile.category) 
                     }]}
                     onPress={handleDownload}
+                    disabled={downloading}
                   >
-                    {t.download}
-                  </Button>
-                  <Button
-                    mode="outlined"
+                    {downloading ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <>
+                        <Ionicons name="download-outline" size={20} color="#fff" />
+                        <Text style={styles.modalDownloadText}>Download</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.modalCloseButton2}
                     onPress={() => {
                       setModalVisible(false);
                       setSelectedFile(null);
                     }}
-                    style={styles.closeButton}
                   >
-                    {t.close}
-
-                  </Button>
+                    <Text style={styles.modalCloseText}>Close</Text>
+                  </TouchableOpacity>
                 </View>
               </>
             )}
@@ -586,13 +417,10 @@ const AchievementsScreen = () => {
   );
 };
 
-export default AchievementsScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-    paddingTop: 16,
   },
   loader: {
     flex: 1,
@@ -600,56 +428,70 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f8fafc',
   },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#64748b',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   headerIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     backgroundColor: '#e0f2fe',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   headerIconText: {
-    fontSize: 24,
+    fontSize: 26,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#0f172a',
+    letterSpacing: -0.5,
   },
   headerSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#64748b',
-    marginTop: 2,
+    marginTop: 4,
   },
   list: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    padding: 16,
+    paddingBottom: 24,
   },
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 14,
-    marginBottom: 12,
+    borderRadius: 16,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#f1f5f9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
   cardContent: {
     padding: 16,
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 12,
   },
   iconContainer: {
-    width: 50,
-    height: 50,
+    width: 48,
+    height: 48,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -663,8 +505,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#1e293b',
+    fontWeight: '600',
+    color: '#0f172a',
     marginBottom: 6,
     lineHeight: 22,
   },
@@ -677,10 +519,11 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 12,
     fontWeight: '600',
+    textTransform: 'capitalize',
   },
   detailsContainer: {
     backgroundColor: '#f8fafc',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
   },
   detailRow: {
@@ -691,28 +534,32 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 13,
     color: '#64748b',
-    fontWeight: '600',
+    fontWeight: '500',
+    marginLeft: 6,
     marginRight: 8,
-    minWidth: 80,
+    width: 60,
   },
   detailValue: {
     fontSize: 14,
-    color: '#475569',
+    color: '#334155',
     fontWeight: '500',
     flex: 1,
   },
   descriptionBox: {
-    marginTop: 4,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
   },
   descriptionLabel: {
     fontSize: 13,
     color: '#64748b',
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   descriptionText: {
     fontSize: 14,
-    color: '#475569',
+    color: '#334155',
     lineHeight: 20,
   },
   actions: {
@@ -721,35 +568,48 @@ const styles = StyleSheet.create({
   },
   viewButton: {
     flex: 1,
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 8,
+  },
+  viewButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 60,
+    paddingTop: 80,
+    paddingHorizontal: 32,
   },
   emptyIcon: {
     backgroundColor: '#f1f5f9',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   emptyIconText: {
-    fontSize: 32,
+    fontSize: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#475569',
+    color: '#334155',
     marginBottom: 8,
+    textAlign: 'center',
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#94a3b8',
     textAlign: 'center',
+    lineHeight: 22,
   },
   modalOverlay: {
     flex: 1,
@@ -759,56 +619,149 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    maxHeight: '85%',
+    borderRadius: 20,
+    maxHeight: '90%',
   },
   modalHeader: {
-    marginBottom: 16,
+    padding: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  modalHeaderTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 8,
+    color: '#0f172a',
+    flex: 1,
+    marginRight: 12,
+  },
+  modalCloseButton: {
+    padding: 4,
   },
   modalCategoryBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
   modalCategoryText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
+  },
+  modalBody: {
+    maxHeight: 500,
   },
   modalViewer: {
     width: '100%',
-    height: 400,
-    borderRadius: 10,
-    backgroundColor: '#f1f5f9',
+    height: 300,
+    backgroundColor: '#f8fafc',
   },
-  imageContainer: {
+  webviewLoader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  modalImage: {
     width: '100%',
-    height: 400,
-    borderRadius: 10,
-    backgroundColor: '#f1f5f9',
+    height: 300,
+    backgroundColor: '#f8fafc',
+  },
+  fileInfoContainer: {
+    height: 200,
+    backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  imagePlaceholder: {
+  fileInfoText: {
+    marginTop: 12,
     fontSize: 16,
+    color: '#3b82f6',
+    fontWeight: '600',
+  },
+  modalDetails: {
+    padding: 20,
+  },
+  modalDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  modalDetailLabel: {
+    fontSize: 14,
     color: '#64748b',
+    fontWeight: '500',
+    marginLeft: 8,
+    marginRight: 12,
+    width: 65,
+  },
+  modalDetailValue: {
+    fontSize: 15,
+    color: '#0f172a',
+    fontWeight: '500',
+    flex: 1,
+  },
+  modalDescription: {
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  modalDescriptionLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  modalDescriptionText: {
+    fontSize: 15,
+    color: '#334155',
+    lineHeight: 22,
   },
   modalActions: {
     flexDirection: 'row',
-    marginTop: 16,
+    padding: 20,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    gap: 12,
   },
-  downloadButton: {
+  modalDownloadButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+  },
+  modalDownloadText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  modalCloseButton2: {
     flex: 1,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
   },
-  closeButton: {
-    marginLeft: 10,
+  modalCloseText: {
+    color: '#475569',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
+
+export default AchievementsScreen;

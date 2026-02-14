@@ -34,7 +34,7 @@ router.post("/", upload.array("attachments"), async (req, res) => {
     const updatedProject = await Project.findByIdAndUpdate(
     req.body.projectId,
     { $inc: { submissions: 1 } },
-    { new: true }   // 👈 IMPORTANT
+    { new: true }   
     );
 
     console.log("UPDATED PROJECT:", updatedProject);

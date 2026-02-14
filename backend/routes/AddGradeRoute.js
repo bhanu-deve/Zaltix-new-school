@@ -11,7 +11,6 @@ import {
 
 const router = express.Router();
 
-/* ===== ORDER IS IMPORTANT ===== */
 router.get("/", getAllReports);
 router.get("/student/:name", getStudentByName);
 router.get("/roll/:rollNo", getStudentByRollNo);

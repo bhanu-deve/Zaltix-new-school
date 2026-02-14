@@ -3,9 +3,7 @@ import User from "../models/User.js";
 import bcrypt from "bcrypt";
 
 
-/**
- * GET all staff members
- */
+
 export const getAllStaff = async (req, res) => {
   try {
     const staffMembers = await AddStaff.find().lean().exec();

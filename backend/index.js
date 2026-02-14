@@ -40,6 +40,7 @@ import feeManagementRoutes from "./routes/feeManagementRoutes.js";
 
 import paymentRoutes from "./routes/paymentRoutes.js";
 import holidayRoutes from "./routes/holidayRoutes.js";
+import eventRoutes from './routes/eventRoutes.js';
 
 
 
@@ -134,6 +135,7 @@ app.use("/api/payment", paymentRoutes);
 
 
 
+
 // /* ===== STATIC FILES ===== */
 // app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // app.use('/uploads/achievements', express.static(path.join(process.cwd(), 'uploads/achievements')));
@@ -162,6 +164,7 @@ app.use("/driver", DriverAuthRoute);
 app.use("/submitProject", SubmitProjectRoute);
 app.use("/project-submissions", ProjectSubmissionRoute);
 app.use("/api/holidays", holidayRoutes);
+app.use('/api/events', eventRoutes);
 
 /* DB ERROR HANDLER */
 Db.on('error', (err) => console.error('MongoDB error:', err));

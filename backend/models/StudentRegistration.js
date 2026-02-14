@@ -13,7 +13,7 @@ const studentRegistrationSchema = new mongoose.Schema(
     parentName: { type: String, required: true },
     parentPhone: { type: String, required: true },
     parentEmail: String,
-    parentEmail: { type: String, required: true }, // ✅ OTP will go here
+    parentEmail: { type: String, required: true }, 
 
     
     otp: String,

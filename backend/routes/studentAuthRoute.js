@@ -15,7 +15,7 @@ const router = express.Router();
 
 router.post("/login", studentLogin);
 router.put("/change-password", verifyToken, changeStudentPassword);
-/* FORGOT PASSWORD FLOW */
+
 router.post("/forgot-password", forgotPassword);   // send OTP
 router.post("/verify-otp", verifyOTP);              // verify OTP
 router.post("/reset-password", resetPassword);      // set new password

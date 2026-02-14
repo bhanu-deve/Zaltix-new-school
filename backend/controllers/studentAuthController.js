@@ -41,27 +41,6 @@ export const studentLogin = async (req, res) => {
       return res.status(401).json({ error: "Invalid roll number or password" });
     }
 
-    // ✅ JWT
-    // const token = jwt.sign(
-    //   {
-    //     id: student._id,
-    //     rollNumber: student.rollNumber,
-    //     role: "student",
-    //   },
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: "7d" }
-    // );
-
-    // return res.json({
-    //   token,
-    //   student: {
-    //     id: student._id,
-    //     name: `${student.firstName} ${student.lastName}`,
-    //     rollNumber: student.rollNumber,
-    //     grade: student.grade,
-    //     section: student.section,
-    //   },
-    // });
     const payload = {
       id: student._id,
       rollNumber: student.rollNumber,

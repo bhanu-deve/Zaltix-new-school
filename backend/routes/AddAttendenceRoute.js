@@ -15,9 +15,7 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-/* =========================================================
-   TEACHER – GET STUDENTS FOR MARKING ATTENDANCE
-   ========================================================= */
+
 router.get("/", async (req, res) => {
   try {
     const { class: className, date, subject } = req.query;
@@ -50,9 +48,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-/* =========================================================
-   TEACHER – UPDATE SINGLE STUDENT ATTENDANCE
-   ========================================================= */
 router.put("/:studentId", async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -94,9 +89,6 @@ router.put("/:studentId", async (req, res) => {
   }
 });
 
-/* =========================================================
-   TEACHER – BULK SAVE ATTENDANCE
-   ========================================================= */
 router.post("/bulk", async (req, res) => {
   try {
     for (const entry of req.body) {
@@ -140,9 +132,6 @@ router.post("/bulk", async (req, res) => {
   }
 });
 
-/* =========================================================
-   PRINCIPAL – STUDENTS WITH ATTENDANCE
-   ========================================================= */
 router.get("/students-with-attendance", async (req, res) => {
   try {
     const { date, class: className } = req.query;
@@ -179,9 +168,7 @@ router.get("/students-with-attendance", async (req, res) => {
   }
 });
 
-/* =========================================================
-   PRINCIPAL – ATTENDANCE STATS
-   ========================================================= */
+
 router.get("/attendance-stats", async (req, res) => {
   try {
     const { date, class: className } = req.query;
@@ -217,9 +204,7 @@ router.get("/attendance-stats", async (req, res) => {
   }
 });
 
-/* =========================================================
-   PRINCIPAL – CLASS ATTENDANCE SUMMARY
-   ========================================================= */
+
 router.get("/class-attendance-summary", async (req, res) => {
   try {
     const { date } = req.query;
@@ -255,9 +240,7 @@ router.get("/class-attendance-summary", async (req, res) => {
   }
 });
 
-/* =========================================================
-   PRINCIPAL – ATTENDANCE TRENDS (CHART)
-   ========================================================= */
+
 router.get("/attendance-trends", async (req, res) => {
   try {
     const { viewType = "weekly", class: className } = req.query;
@@ -323,42 +306,14 @@ router.get("/attendance-trends", async (req, res) => {
   }
 });
 
-/* =========================================================
-   GET ALL CLASSES
-   ========================================================= */
+
 router.get("/classes", async (req, res) => {
   const students = await StudentRegistration.find({});
   const classes = [...new Set(students.map(s => `${s.grade}${s.section}`))];
   res.json(classes);
 });
 
-/* =========================================================
-   STUDENT – GET OWN ATTENDANCE (BY ROLL NUMBER)
-   ========================================================= */
-  // router.get("/student/:rollNumber", async (req, res) => {
-  //   try {
-  //     const { rollNumber } = req.params;
 
-  //     const record = await Attendance.findOne({
-  //       "student.rollNo": String(rollNumber),
-  //     });
-
-  //     if (!record) {
-  //       return res.status(404).json({ error: "Attendance not found" });
-  //     }
-
-  //     res.json(record);
-  //   } catch (e) {
-  //     console.error("STUDENT ATTENDANCE ERROR:", e);
-  //     res.status(500).json({ error: "Failed to fetch attendance" });
-  //   }
-
-  // });
-
-  
-  /* =========================================================
-   STUDENT – GET OWN ATTENDANCE (BY ROLL NUMBER)
-   ========================================================= */
 router.get("/by-roll", async (req, res) => {
   try {
     const { rollNumber } = req.query;

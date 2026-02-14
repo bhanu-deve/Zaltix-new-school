@@ -47,40 +47,6 @@ export const createEbook = async (req, res) => {
 };
 
 
-// GET all ebooks
-// export const getEbooks = async (req, res) => {
-//   try {
-//     const { page = 1, limit = 10, search = '' } = req.query;
-//     const skip = (page - 1) * limit;
-//     const query = {};
-
-//     if (search) {
-//       query.$or = [
-//         { title: { $regex: search, $options: 'i' } },
-//         { author: { $regex: search, $options: 'i' } },
-//         { subject: { $regex: search, $options: 'i' } },
-//         { class: { $regex: search, $options: 'i' } },
-//       ];
-//     }
-
-//     const [ebooks, total] = await Promise.all([
-//       Ebook.find(query).sort({ uploadDate: -1 }).skip(+skip).limit(+limit),
-//       Ebook.countDocuments(query)
-//     ]);
-
-//     res.json({
-//       data: ebooks,
-//       meta: {
-//         total,
-//         page: +page,
-//         limit: +limit,
-//         totalPages: Math.ceil(total / limit)
-//       }
-//     });
-//   } catch {
-//     res.status(500).json({ error: "Failed to fetch ebooks" });
-//   }
-// };
 export const getEbooks = async (req, res) => {
   try {
     const { class: className, section } = req.query;
