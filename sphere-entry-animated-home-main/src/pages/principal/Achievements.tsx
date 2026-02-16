@@ -73,7 +73,7 @@ const Achievements = () => {
   const fetchEvents = async () => {
     try {
       setEventsLoading(true);
-      const { data } = await api.get('/events');
+      const { data } = await api.get('/api/events');
       // Sort events by date (closest first)
       const sortedEvents = data.sort((a: Event, b: Event) => 
         new Date(a.date).getTime() - new Date(b.date).getTime()
