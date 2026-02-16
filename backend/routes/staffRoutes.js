@@ -1,22 +1,3 @@
-// import express from 'express';
-// import { AddStaff as Staff } from '../models/AddStaff.js';
-
-
-// const router = express.Router();
-
-// router.get('/', async (req, res) => {
-//   try {
-//     const staff = await Staff.find({ status: 'Active' })
-//       .select('_id name role subjects classes');
-//     res.json(staff);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Failed to fetch staff' });
-//   }
-// });
-
-// export default router;
-
-
 import express from 'express';
 import { AddStaff as Staff } from '../models/AddStaff.js';
 
@@ -25,12 +6,13 @@ const router = express.Router();
 // Get all staff (including photos)
 router.get('/', async (req, res) => {
   try {
-    // Get all fields including photo
-    const staff = await Staff.find({ status: 'Active' });
+    const staff = await Staff.find(); // ✅ FIXED HERE
+
     console.log('Backend - Found staff:', staff.length);
     if (staff.length > 0) {
       console.log('Backend - First staff photo exists:', !!staff[0].photo);
     }
+
     res.json(staff);
   } catch (err) {
     console.error('Backend error:', err);
