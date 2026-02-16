@@ -190,8 +190,10 @@ export const addStaff = async (req, res) => {
       phone,
       status,
       password,
-      photo // Add photo field
+      photo
     } = req.body;
+
+    console.log('Backend - Adding staff with photo:', !!photo);
 
     if (!name || !role || !subjects || !classes || !joinDate || !email || !phone || !password) {
       return res.status(400).json({ error: "All fields are required" });
@@ -202,7 +204,7 @@ export const addStaff = async (req, res) => {
       return res.status(400).json({ error: "Login already exists for this email" });
     }
 
-    // ✅ SAVE STAFF (WITH PHOTO)
+    // SAVE STAFF (WITH PHOTO)
     const savedStaff = await AddStaff.create({
       name,
       role,
@@ -212,13 +214,13 @@ export const addStaff = async (req, res) => {
       email,
       phone,
       status: status || "Active",
-      photo: photo || '' // Save photo if provided
+      photo: photo || ''
     });
 
-    // ✅ HASH PASSWORD
+    // HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ SAVE LOGIN USER
+    // SAVE LOGIN USER
     await User.create({
       email,
       password: hashedPassword,
@@ -275,8 +277,10 @@ export const updateStaff = async (req, res) => {
       email,
       phone,
       status,
-      photo // Add photo field
+      photo
     } = req.body;
+
+    console.log('Backend - Updating staff with photo:', !!photo);
 
     const updatedStaff = await AddStaff.findByIdAndUpdate(
       id,
@@ -289,7 +293,7 @@ export const updateStaff = async (req, res) => {
         email,
         phone,
         status,
-        photo // Update photo if provided
+        photo
       },
       { new: true, runValidators: true }
     ).exec();

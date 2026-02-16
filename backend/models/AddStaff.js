@@ -111,7 +111,7 @@ const StaffSchema = new mongoose.Schema(
       default: 'Active'
     },
     photo: {
-      type: String, // Store as Base64 string or URL
+      type: String,
       default: ''
     }
   },

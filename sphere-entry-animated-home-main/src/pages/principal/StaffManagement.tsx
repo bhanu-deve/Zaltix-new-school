@@ -296,10 +296,24 @@ const StaffManagement = () => {
   const fetchStaffData = async () => {
     try {
       const res = await api.get('/Addstaff');
-      console.log('Staff data received:', res.data); // Check what fields are coming
-      console.log('First staff member photo:', res.data[0]?.photo); // Check if photo exists
+      console.log('Staff data received:', res.data);
+      
+      // Log each staff member's photo status
+      if (res.data && res.data.length > 0) {
+        res.data.forEach((staff: Staff, index: number) => {
+          console.log(`Staff ${index} (${staff.name}):`, {
+            hasPhoto: !!staff.photo,
+            photoLength: staff.photo?.length,
+            subjects: staff.subjects,
+            classes: staff.classes
+          });
+        });
+      }
+      
       setStaffData(res.data || []);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Fetch error:', error);
+      console.error('Error response:', error.response?.data);
       toast.error('Failed to load staff');
     }
   };
@@ -312,21 +326,30 @@ const StaffManagement = () => {
 
   const handleAddOrUpdateStaff = async (staff: Staff) => {
     try {
+      console.log('Sending to API:', {
+        ...staff,
+        photo: staff.photo ? `Photo present (length: ${staff.photo.length})` : 'No photo'
+      });
+
       if (editingStaff) {
         // UPDATE
-        await api.put(`/Addstaff/${editingStaff._id}`, staff);
+        const response = await api.put(`/Addstaff/${editingStaff._id}`, staff);
+        console.log('Update response:', response.data);
         toast.success('Staff updated successfully');
       } else {
         // CREATE
-        await api.post('/Addstaff', staff);
+        const response = await api.post('/Addstaff', staff);
+        console.log('Create response:', response.data);
         toast.success('Staff added successfully');
       }
 
       setShowAddModal(false);
       setEditingStaff(null);
       fetchStaffData();
-    } catch (error) {
-      toast.error('Operation failed');
+    } catch (error: any) {
+      console.error('Operation failed:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error(error.response?.data?.error || 'Operation failed');
     }
   };
 

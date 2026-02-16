@@ -25,11 +25,15 @@ const router = express.Router();
 // Get all staff (including photos)
 router.get('/', async (req, res) => {
   try {
-    // Remove the .select() to get all fields, or explicitly include photo
-    const staff = await Staff.find({ status: 'Active' })
-      .select('_id name role subjects classes email phone status photo joinDate'); // Added photo here
+    // Get all fields including photo
+    const staff = await Staff.find({ status: 'Active' });
+    console.log('Backend - Found staff:', staff.length);
+    if (staff.length > 0) {
+      console.log('Backend - First staff photo exists:', !!staff[0].photo);
+    }
     res.json(staff);
   } catch (err) {
+    console.error('Backend error:', err);
     res.status(500).json({ message: 'Failed to fetch staff' });
   }
 });
